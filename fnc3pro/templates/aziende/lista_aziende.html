@@ -1,0 +1,479 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static%}
+
+<!-- ========== Page Title Start ========== -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">Lista Aziende</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="javascript: void(0);">Aziende</a></li>
+                <li class="breadcrumb-item active">Lista Aziende</li>
+            </ol>
+        </div>
+    </div>
+</div>
+<!-- ========== Page Title End ========== -->
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+             <div class="card-header border-0">
+                  <div class="row justify-content-between">
+                       <div class="col-lg-6">
+                            <div class="row align-items-center">
+                                 <div class="col-lg-6">
+                                      <form class="app-search d-none d-md-block me-auto">
+                                           <div class="position-relative">
+                                                <input type="search" class="form-control" placeholder="Cerca Azienda" autocomplete="off" value="">
+                                                <iconify-icon icon="solar:magnifer-broken" class="search-widget-icon"></iconify-icon>
+                                           </div>
+                                      </form>
+                                 </div>
+                                 <div class="col-lg-4">
+                                      <h5 class="text-dark fw-medium mb-0">311 <span class="text-muted">Aziende</span></h5>
+                                 </div>
+                            </div>
+                       </div>
+                       <div class="col-lg-6">
+                            <div class="text-md-end mt-3 mt-md-0">
+                                <!-- Bottone IMPOSTAZIONI che apre il Modal -->
+                                <button type="button" class="btn btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                                    <i class="ri-settings-2-line me-1"></i>Impostazioni
+                                </button>
+
+                                <!-- Bottone FILTRA che attiva/disattiva i filtri sulle colonne -->
+                                <button type="button" class="btn btn-outline-primary me-1" id="toggleFiltersBtn">
+                                    <i class="ri-filter-line me-1"></i> Filtri
+                                </button>
+
+                                <a href="{% url 'crea_azienda' %}" class="btn btn-success me-1"><i class="ri-add-line"></i> Nuova Azienda</a>
+                                <button type="button" class="btn btn-outline-secondary me-1" data-bs-toggle="modal" data-bs-target="#openapiModal"> 
+                                    <img src="{% static 'images/openapiicon.png' %}" class="me-2" style="width: 16px; height: 16px;"> Aggiungi Open API
+                                </button>
+                                
+                            </div>
+                       </div><!-- end col-->
+                  </div>
+             </div>
+        </div>
+   </div>
+</div>
+
+<!-- Modal per la ricerca/creazione con OpenAPI -->
+<div class="modal fade" id="openapiModal" tabindex="-1" aria-labelledby="openapiModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="openapiModalLabel">Crea/Aggiorna Azienda da OpenAPI</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="pivaInput" class="form-label">Inserisci Partita IVA</label>
+          <input type="text" class="form-control" id="pivaInput" placeholder="Es. 12345678901">
+        </div>
+
+        <!-- Qui mostreremo i risultati della chiamata AJAX -->
+        <div id="openapiResult" class="mt-3" style="min-height:50px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+        <button type="button" class="btn btn-primary" onclick="cercaAziendaOpenApi()">
+          Cerca / Crea
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col-xl-12">
+     <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+               <div>
+                    <h4 class="card-title mb-0">Lista Aziende</h4>
+               </div>
+               <div class="dropdown">
+                    <a href="#" class="dropdown-toggle btn btn-sm btn-outline-light rounded" data-bs-toggle="dropdown" aria-expanded="false">
+                         This Month
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end">
+                         <a href="#!" class="dropdown-item">Download</a>
+                         <a href="#!" class="dropdown-item">Export</a>
+                         <a href="#!" class="dropdown-item">Import</a>
+                    </div>
+               </div>
+          </div>
+
+          <!-- Tabella con Thead + Tbody -->
+          <div class="table-responsive">
+            <table class="table align-middle text-nowrap table-hover table-centered mb-0" id="aziendeTable">
+                <thead class="bg-light-subtle" id="tableHeader">
+                    <tr>
+                        <!-- Checkbox di selezione multipla -->
+                        <th class="col-select" data-col-name="select" style="width:20px;">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="customCheckAll">
+                                <label class="form-check-label" for="customCheckAll"></label>
+                            </div>
+                        </th>
+                        <th class="col-azienda" data-col-name="azienda">Nome Azienda</th>
+                        <th class="col-piva" data-col-name="piva">Partita IVA</th>
+                        <th class="col-ateco" data-col-name="ateco">Codice Ateco</th>
+                        <th class="col-indirizzo" data-col-name="indirizzo">Indirizzo Sede Legale</th>
+                        <th class="col-email" data-col-name="email">Email</th>
+                        <th class="col-dipendenti" data-col-name="dipendenti">Numero Dipendenti</th>
+                        <th class="col-azioni" data-col-name="azioni">Azioni</th>
+                    </tr>
+                    <!-- RIGA DEI FILTRI (inizialmente nascosta) -->
+                    <tr class="filters-row" style="display: none;">
+                        <th></th> <!-- Per la colonna dei checkbox non mettiamo filtro -->
+                        <th><input type="text" class="form-control filter-input" data-col="col-azienda" placeholder="Filtra Azienda"></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-piva" placeholder="Filtra P.IVA"></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-ateco" placeholder="Filtra ATECO"></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-indirizzo" placeholder="Filtra Indirizzo"></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-email" placeholder="Filtra Email"></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-dipendenti" placeholder="Filtra Dipendenti"></th>
+                        <th></th> <!-- Per la colonna "Azioni" non mettiamo filtro -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for azienda in aziende %}
+                    <tr>
+                        <!-- Checkbox -->
+                        <td class="col-select">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="customCheck{{ forloop.counter }}">
+                                <label class="form-check-label" for="customCheck{{ forloop.counter }}">&nbsp;</label>
+                            </div>
+                        </td>
+                
+                        <!-- Nome azienda + link ai dettagli -->
+                        <td class="col-azienda">
+                            <a href="{% url 'azienda_dettagli' azienda.id %}" class="text-dark fw-medium fs-15">
+                                {{ azienda.nome }}
+                            </a>
+                        </td>
+                
+                        <!-- Partita IVA -->
+                        <td class="col-piva">{{ azienda.partitaiva }}</td>
+                
+                        <!-- Codice Ateco (mostra solo il codice) -->
+                        <td class="col-ateco">
+                            {% if azienda.codiceateco %}
+                                {{ azienda.codiceateco.codice }}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                
+                        <!-- Indirizzo sede legale -->
+                        <td class="col-indirizzo">{{ azienda.indirizzosl }}</td>
+                
+                        <!-- Email -->
+                        <td class="col-email">{{ azienda.email }}</td>
+                
+                        <!-- Numero Dipendenti (count) -->
+                        <td class="col-dipendenti">{{ azienda.dipendenti.count }}</td>
+                
+                        <!-- Azioni -->
+                        <td class="col-azioni">
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'azienda_dettagli' azienda.id %}" class="btn btn-light btn-sm">
+                                    <iconify-icon icon="solar:eye-broken" class="align-middle fs-18"></iconify-icon>
+                                </a>
+                                <a href="{% url 'modifica_azienda' azienda.id %}" class="btn btn-soft-primary btn-sm">
+                                    <iconify-icon icon="solar:pen-2-broken" class="align-middle fs-18"></iconify-icon>
+                                </a>
+                                <a href="{% url 'azienda_dipendenti' azienda.id %}" class="btn btn-soft-success btn-sm">
+                                    <iconify-icon icon="ri-group-line" class="align-middle fs-18"></iconify-icon>
+                                </a>
+                                <button onclick="confirmDelete('{{ azienda.id }}')" class="btn btn-soft-danger btn-sm">
+                                    <iconify-icon icon="solar:trash-bin-minimalistic-2-broken" class="align-middle fs-18"></iconify-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+          </div>
+
+          <div class="card-footer">
+               <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-end mb-0">
+                         <li class="page-item"><a class="page-link" href="javascript:void(0);">Previous</a></li>
+                         <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+                         <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+                         <li class="page-item"><a class="page-link" href="javascript:void(0);">3</a></li>
+                         <li class="page-item"><a class="page-link" href="javascript:void(0);">Next</a></li>
+                    </ul>
+               </nav>
+          </div>
+     </div>
+</div>
+
+
+<!-- Modal Impostazioni -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="columnSettingsForm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Impostazioni Colonne</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          <p>Seleziona/deseleziona le colonne da mostrare:</p>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-azienda" id="checkAzienda" checked>
+            <label class="form-check-label" for="checkAzienda">Nome Azienda</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-piva" id="checkPiva" checked>
+            <label class="form-check-label" for="checkPiva">Partita IVA</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-ateco" id="checkAteco" checked>
+            <label class="form-check-label" for="checkAteco">Codice Ateco</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-indirizzo" id="checkIndirizzo" checked>
+            <label class="form-check-label" for="checkIndirizzo">Indirizzo Sede Legale</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-email" id="checkEmail" checked>
+            <label class="form-check-label" for="checkEmail">Email</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-dipendenti" id="checkDipendenti" checked>
+            <label class="form-check-label" for="checkDipendenti">Numero Dipendenti</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-azioni" id="checkAzioni" checked>
+            <label class="form-check-label" for="checkAzioni">Azioni</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+          <button type="submit" class="btn btn-primary">Applica modifiche</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Script SweetAlert2 per la conferma di cancellazione -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Funzione per la conferma di cancellazione
+    function confirmDelete(aziendaId) {
+        Swal.fire({
+            title: 'Sei sicuro?',
+            text: "Vuoi eliminare questa azienda?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sì, elimina!',
+            cancelButtonText: 'Annulla'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/aziende/elimina/${aziendaId}/`;
+            }
+        });
+    }
+
+    // 1) Bottone FILTRA: attiva/disattiva la riga dei filtri
+    const toggleFiltersBtn = document.getElementById('toggleFiltersBtn');
+    const filtersRow = document.querySelector('.filters-row');
+
+    toggleFiltersBtn.addEventListener('click', () => {
+        if (filtersRow.style.display === 'none' || filtersRow.style.display === '') {
+            filtersRow.style.display = 'table-row';
+        } else {
+            filtersRow.style.display = 'none';
+        }
+    });
+
+    // 2) Filtraggio per colonna stile "Excel/GoogleSheet"
+    //    Ogni input ha data-col="col-..." per sapere su che colonna filtrare.
+    const filterInputs = document.querySelectorAll('.filter-input');
+
+    filterInputs.forEach(input => {
+        input.addEventListener('input', () => {
+            // ottieni la classe della colonna su cui filtrare
+            let colClass = input.getAttribute('data-col');
+            let filterValue = input.value.toLowerCase();
+
+            // filtra le righe della tabella
+            const rows = document.querySelectorAll('#aziendeTable tbody tr');
+            rows.forEach(row => {
+                const td = row.querySelector('.' + colClass);
+                if (!td) return;
+
+                let tdText = td.innerText.toLowerCase();
+                if (tdText.indexOf(filterValue) > -1) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // 3) Bottone IMPOSTAZIONI: gestione mostra/nascondi colonne
+    const columnCheckboxes = document.querySelectorAll('.column-checkbox');
+    const columnSettingsForm = document.getElementById('columnSettingsForm');
+
+    // All'invio del form, applichiamo le impostazioni
+    columnSettingsForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Per ogni checkbox, mostra o nascondi le colonne corrispondenti
+        columnCheckboxes.forEach(checkbox => {
+            const colClass = checkbox.value;
+            const checked = checkbox.checked;
+
+            // Troviamo tutti i th e td con la classe "col-..."
+            const colElements = document.querySelectorAll('.' + colClass);
+            colElements.forEach(el => {
+                el.style.display = checked ? '' : 'none';
+            });
+        });
+
+        // Chiudi il modal
+        var myModalEl = document.getElementById('settingsModal');
+        var modal = bootstrap.Modal.getInstance(myModalEl);
+        modal.hide();
+
+        // Mostra un alert (puoi usare anche SweetAlert o un toasty)
+        Swal.fire({
+            icon: 'info',
+            title: 'Tabella filtrata',
+            text: 'La tabella è stata aggiornata con le nuove impostazioni di colonna.'
+        });
+    });
+</script>
+
+<!-- Script per la chiamata AJAX alla OpenAPI -->
+<script>
+    function cercaAziendaOpenApi() {
+        const piva = document.getElementById("pivaInput").value.trim();
+        const resultDiv = document.getElementById("openapiResult");
+        if (!piva) {
+            resultDiv.innerHTML = "<div class='text-danger'>Inserisci una Partita IVA valida.</div>";
+            return;
+        }
+    
+        // Svuota l'area risultati
+        resultDiv.innerHTML = "<div class='text-info'>Ricerca in corso...</div>";
+    
+        // Chiamata GET al tuo endpoint carica_azienda_openapi
+        fetch(`/aziende/carica_azienda_openapi/?partitaiva=${piva}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    // Errore (es. P.IVA non valida, API non raggiungibile, etc.)
+                    resultDiv.innerHTML = `<div class='text-danger'>${data.msgResponse}</div>`;
+                } else {
+                    // success = true => o azienda creata (db='no') o già registrata (db='yes')
+                    if (data.db === 'no') {
+                        // Azienda appena inserita in DB
+                        resultDiv.innerHTML = `
+                          <div class='text-success'>
+                            <strong>Azienda creata con successo!</strong><br>
+                            Nome: ${data.azienda}<br>
+                            P.IVA: ${data.partitaiva}<br>
+                            Indirizzo: ${data.indirizzosl}
+                          </div>
+                        `;
+                    } else if (data.db === 'yes') {
+                        // Azienda esisteva già
+                        // Verifichiamo se esistono "differenze" da mostrare
+                        let diffHtml = '';
+                        if (data.differenze && Object.keys(data.differenze).length > 0) {
+                            diffHtml += `
+                              <div class="mt-3">
+                                <strong>Campi differenti (DB vs OpenAPI):</strong>
+                                <table class="table table-sm table-bordered mt-2">
+                                  <thead>
+                                    <tr>
+                                      <th>Campo</th>
+                                      <th>DB</th>
+                                      <th>OpenAPI</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                            `;
+                            for (let campo in data.differenze) {
+                                let diff = data.differenze[campo];
+                                diffHtml += `
+                                    <tr>
+                                      <td>${campo}</td>
+                                      <td>${diff.db}</td>
+                                      <td>${diff.api}</td>
+                                    </tr>
+                                `;
+                            }
+                            diffHtml += `
+                                  </tbody>
+                                </table>
+                              </div>
+                            `;
+                        } else {
+                            diffHtml = `
+                              <div class='text-info mt-3'>
+                                Nessuna differenza tra DB e OpenAPI.
+                              </div>
+                            `;
+                        }
+    
+                        resultDiv.innerHTML = `
+                          <div class='text-warning'>
+                            <strong>Azienda già presente.</strong><br>
+                            Vuoi aggiornarla? <br><br>
+                            <button class="btn btn-outline-primary" onclick="updateAziendaOpenApi('${piva}')">
+                              Aggiorna Dati
+                            </button>
+                          </div>
+                          ${diffHtml}
+                        `;
+                    }
+                }
+            })
+            .catch(err => {
+                console.error("Errore fetch:", err);
+                resultDiv.innerHTML = "<div class='text-danger'>Errore di rete.</div>";
+            });
+    }
+    
+    function updateAziendaOpenApi(piva) {
+        const resultDiv = document.getElementById("openapiResult");
+        resultDiv.innerHTML = "<div class='text-info'>Aggiornamento in corso...</div>";
+    
+        fetch(`/aziende/update_azienda_openapi/?partitaiva=${piva}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<div class='text-danger'>${data.msgResponse}</div>`;
+                } else {
+                    // Aggiornamento riuscito
+                    resultDiv.innerHTML = `
+                      <div class='text-success'>
+                        <strong>Azienda aggiornata!</strong><br>
+                        Nome: ${data.azienda}<br>
+                        P.IVA: ${data.partitaiva}<br>
+                        Indirizzo: ${data.indirizzosl}
+                      </div>
+                    `;
+                }
+            })
+            .catch(err => {
+                console.error("Errore update:", err);
+                resultDiv.innerHTML = "<div class='text-danger'>Errore di rete durante l'aggiornamento.</div>";
+            });
+    }
+    </script>
+    
+{% endblock content %}

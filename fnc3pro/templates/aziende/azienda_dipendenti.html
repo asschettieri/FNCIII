@@ -1,0 +1,156 @@
+<!-- Azienda Info -->
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<!-- ========== Page Title Start ========== -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">Dipendenti per Azienda</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'lista_aziende' %}">Lista Aziende</a></li>
+                <li class="breadcrumb-item active">{{ azienda.azienda }}</li>
+            </ol>
+        </div>
+    </div>
+</div>
+<!-- ========== Page Title End ========== -->
+
+
+
+
+<div class="row">
+    <div class="col-xl-6 col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-lg-7">
+                        <h4 class="text-dark mb-1">{{ azienda.azienda }}</h4>
+                        <p class="fs-14">{{ azienda.note }}</p>
+                        <div class="row align-items-center text-center mb-2">
+                            <div class="col-lg-7 border-end border-light">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <h5>Partita IVA</h5>
+                                        <h2 class="fw-semibold text-dark">{{ azienda.partitaiva }}</h2>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h5>Codice Ateco</h5>
+                                        <h2 class="fw-semibold text-dark">{{ azienda.codiceateco }}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-5">
+                                <div class="ps-2">
+                                    <p class="d-flex align-items-center mb-2 gap-2"><i class='ri-circle-fill text-primary'></i>Email: {{ azienda.email }}</p>
+                                    <p class="d-flex align-items-center mb-2 gap-2"><i class='ri-circle-fill text-warning'></i>Telefono: {{ azienda.telefono }}</p>
+                                    <p class="d-flex align-items-center gap-2 mb-0"><i class='ri-circle-fill text-success'></i>PEC: {{ azienda.pec }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-muted mb-0 d-flex align-items-center gap-1">Ultimo Aggiornamento <span>:</span> <span class="text-dark">{{ azienda.last_updated }}</span></p>
+                    </div>
+                    <div class="col-lg-5 text-end">
+                        <img src="{% static 'images/home-2.png' %}" alt="Logo Azienda" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Sedi Aziendali e altre informazioni -->
+    <div class="col-xl-6 col-lg-12">
+        <div class="card">
+            <div class="card-header d-flex align-items-center border-bottom border-dashed">
+                <h4 class="card-title mb-0">Sedi Aziendali</h4>
+            </div>
+            <div class="card-body">
+                <h5>Sede Legale:</h5>
+                <p>{{ azienda.indirizzosl }}, {{ azienda.cittasl }} ({{ azienda.provinciasl }}), {{ azienda.capsl }}</p>
+
+                <h5>Sede Operativa:</h5>
+                <p>{{ azienda.indirizzoso }}, {{ azienda.cittaso }} ({{ azienda.provinciaso }}), {{ azienda.capso }}</p>
+
+                <h5>Luogo Rappresentante:</h5>
+                <p>{{ azienda.indirizzolr }}, {{ azienda.cittalr }} ({{ azienda.provincialr }}), {{ azienda.caplr }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Lista Dipendenti -->
+<div class="row">
+    <div class="col-lg-12">
+         <div class="card bg-body shadow-none">
+              <div class="card-header border-0">
+                   <div class="row justify-content-between align-items-center">
+                        <div class="col-lg-6">
+                             <p class="mb-0 text-muted">Showing all <span class="text-dark fw-semibold">311</span> Agent</p>
+                        </div>
+                        <div class="col-lg-6">
+                             <div class="text-md-end mt-3 mt-md-0">
+                                  <button type="button" class="btn btn-outline-primary me-1"><i class="ri-settings-2-line me-1"></i>More Setting</button>
+                                  <button type="button" class="btn btn-outline-primary me-1"><i class="ri-filter-line me-1"></i> Filters</button>
+                                  <a href="{% url 'crea_dipendente' %}" class="btn btn-success me-1">
+                                    <i class="ri-add-line"></i> Inserisci Dipendente
+                                </a>
+                                
+                             </div>
+                        </div>
+                   </div>
+              </div>
+         </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+            <div class="card-body">
+                <div class="row">
+                    {% for dipendente in dipendenti %}
+                    <div class="col-xl-4 col-lg-6 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center border-bottom pb-3">
+                                    <img src="{{ dipendente.avatar_url|default:'/static/images/user_placeholder.jpg' }}" 
+                                         alt="Foto Dipendente" 
+                                         class="avatar-lg rounded-circle border border-light">
+                                    <div class="ms-3">
+                                        <a href="{% url 'dipendenti_details' dipendente.dipendente_id %}" 
+                                           class="text-dark fw-medium fs-16">
+                                            {{ dipendente.nome }} {{ dipendente.cognome }}
+                                        </a>
+                                        <p class="text-muted mb-0">Email: {{ dipendente.email }}</p>
+                                        <p class="text-muted mb-0">Telefono: {{ dipendente.telefono }}</p>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="mb-2 d-flex align-items-center gap-2">
+                                        <iconify-icon icon="solar:briefcase-bold-duotone" class="fs-18 text-primary"></iconify-icon>
+                                        Mansione: {{ dipendente.mansione }}
+                                    </p>
+                                    <p class="mb-0 d-flex align-items-center gap-2">
+                                        <iconify-icon icon="solar:calendar-bold-duotone" class="fs-18 text-primary"></iconify-icon>
+                                        Assunto il: {{ dipendente.dataassunzione }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between">
+                                <a href="mailto:{{ dipendente.email }}" class="btn btn-outline-primary btn-sm">
+                                    <iconify-icon icon="solar:mail-bold-duotone" class="fs-18"></iconify-icon> Email
+                                </a>
+                                <a href="tel:{{ dipendente.telefono }}" class="btn btn-outline-success btn-sm">
+                                    <iconify-icon icon="solar:phone-calling-bold-duotone" class="fs-18"></iconify-icon> Chiama
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">Nessun dipendente trovato per questa azienda.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- file: dipendenti/allegato2bis_wizard_unapagina.html -->
+
+<style>
+  /* Nascondiamo i vari step, mostrando solo quello "active" */
+  .wizard-step { display: none; }
+  .wizard-step.active { display: block; }
+</style>
+
+<div class="container mt-4">
+  <h1>Wizard Caricamento Allegato 2 bis</h1>
+
+  <!-- =============================================
+       STEP 1: SELEZIONA AZIENDA, con ricerca
+       ============================================= -->
+  <div id="step1" class="wizard-step active">
+    <h2>Step 1: Seleziona Azienda</h2>
+
+    <!-- Campo di ricerca per filtrare le aziende nel select -->
+    <div class="mb-3">
+      <label for="search_azienda" class="form-label">Cerca Azienda</label>
+      <input type="text" id="search_azienda" class="form-control"
+             placeholder="Digita per cercare..."
+             onkeyup="filterAziende()" />
+    </div>
+
+    <div class="mb-3">
+      <label for="azienda_id" class="form-label">Azienda</label>
+      <select class="form-select" name="azienda_id" id="azienda_id">
+        <option value="">-- Seleziona --</option>
+        {% for az in aziende %}
+        <option value="{{ az.id }}"
+                data-email="{{ az.email }}"
+                data-telefono="{{ az.telefono }}"
+                data-cellulare="{{ az.cellulare }}"
+                data-indirizzo="{{ az.indirizzosl }}">
+          {{ az.nome }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button class="btn btn-primary" onclick="goToStep2()">Avanti</button>
+  </div>
+
+  <!-- =============================================
+       STEP 2: INFO AZIENDA A SINISTRA, UPLOAD FILE A DESTRA
+       ============================================= -->
+  <div id="step2" class="wizard-step">
+    <!-- ========== Page Title Start ========== -->
+    <div class="row">
+      <div class="col-12">
+        <div class="page-title-box">
+          <h4 class="mb-0 fw-semibold">Carica Allegato 2 bis</h4>
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="javascript: void(0);">Home</a></li>
+            <li class="breadcrumb-item active">Step 2</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <!-- ========== Page Title End ========== -->
+
+    <div class="row">
+      <!-- Colonna Sinistra: Card con info dell'azienda -->
+      <div class="col-xl-3 col-lg-4">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center gap-2 border-bottom pb-3">
+              <!-- Immagine fittizia, se hai un logo puoi sostituire -->
+              <img src="assets/images/users/avatar-2.jpg"
+                   alt="Logo Azienda"
+                   class="avatar-lg rounded-3 border border-light border-3">
+              <div class="d-block">
+                <!-- Nome Azienda -->
+                <a href="#!" class="text-dark fw-medium fs-16" id="azienda_nome">
+                  [Azienda Nome]
+                </a>
+                <!-- Email -->
+                <p class="mb-0" id="azienda_email">info@azienda.com</p>
+                <!-- Un eventuale ID/label -->
+                <p class="mb-0 text-primary" id="azienda_id_label">ID: #---</p>
+              </div>
+            </div>
+
+            <!-- Esempio di altre info (telefono, indirizzo) -->
+            <p class="mt-3 d-flex align-items-center gap-2 mb-2">
+              <iconify-icon icon="solar:home-bold-duotone" class="fs-18 text-primary"></iconify-icon>
+              <span id="azienda_indirizzo">Indirizzo ...</span>
+            </p>
+            <p class="d-flex align-items-center gap-2 mt-2">
+              <iconify-icon icon="solar:map-point-wave-bold-duotone" class="fs-18 text-primary"></iconify-icon>
+              <span id="azienda_telefono">Telefono ...</span>
+            </p>
+
+            <h5 class="my-3">Note:</h5>
+            <p>(eventuali note sull'azienda)</p>
+          </div>
+          <div class="card-footer bg-light-subtle">
+            <div class="row g-2">
+              <div class="col-lg-12">
+                <button class="btn btn-danger w-100" onclick="goToStep1()">
+                  Cambia Azienda
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colonna Destra: Card per caricamento Allegato 2 bis -->
+      <div class="col-xl-9 col-lg-8">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title">Carica Allegato 2 bis</h4>
+          </div>
+          <div class="card-body">
+            <!-- Form di upload -->
+            <form id="uploadForm" enctype="multipart/form-data"
+                  class="bg-light-subtle p-4 rounded">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="parse_file">
+              <input type="hidden" id="step2_azienda_id" name="azienda_id">
+
+              <div class="mb-3">
+                <label for="file_excel" class="form-label">Seleziona file Excel (.xlsx)</label>
+                <input type="file" name="file_excel" id="file_excel"
+                       class="form-control" required />
+              </div>
+
+              <div class="d-flex gap-3 mt-4">
+                <button type="button" class="btn btn-primary" onclick="parseFile()">
+                  Analizza File
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="goToStep1()">
+                  Indietro
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div> <!-- /.col-xl-9 -->
+    </div> <!-- /.row -->
+  </div> <!-- /#step2 -->
+
+
+  <!-- =============================================
+       STEP 3: CONFERMA DATI IMPORT (Nuovi/Duplicati)
+       ============================================= -->
+  <div id="step3" class="wizard-step">
+    <h2>Step 3: Conferma Dati Import</h2>
+    <p>Azienda selezionata: <span id="step3_azienda_name"></span></p>
+
+    <h3>Nuovi Dipendenti</h3>
+    <table class="table table-striped" id="nuoviTable">
+      <thead>
+        <tr>
+          <th>CF</th>
+          <th>Liv. Inq.</th>
+          <th>Ore</th>
+          <th>Retrib</th>
+          <th>Contrib</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h3>Duplicati</h3>
+    <table class="table table-bordered" id="duplicatiTable">
+      <thead>
+        <tr>
+          <th>Aggiorna?</th>
+          <th>CF</th>
+          <th>Liv. Inq. Attuale</th>
+          <th>Liv. Inq. Nuovo</th>
+          <th>Ore</th>
+          <th>Retrib</th>
+          <th>Contrib</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button class="btn btn-success" onclick="confirmImport()">Conferma Import</button>
+    <button class="btn btn-secondary" onclick="goToStep2()">Indietro</button>
+  </div>
+
+</div> <!-- /.container -->
+
+<script>
+/* -------------------------------------------------
+   VARIABILI GLOBALI DI STATO
+   ------------------------------------------------- */
+let nuoviData = [];
+let duplicatiData = [];
+let selectedAziendaId = null;
+let selectedAziendaName = null;
+
+/* -------------------------------------------------
+   STEP 1: FILTRO RICERCA AZIENDE
+   ------------------------------------------------- */
+function filterAziende() {
+  let input = document.getElementById('search_azienda').value.toLowerCase();
+  let aziendaSelect = document.getElementById('azienda_id');
+  // Cicliamo le option (saltiamo la prima con value="", se vuoi)
+  for (let i = 0; i < aziendaSelect.options.length; i++) {
+    let txt = aziendaSelect.options[i].text.toLowerCase();
+    if (i === 0) {
+      // Lasciamo la "Seleziona" sempre visibile
+      aziendaSelect.options[i].style.display = "";
+      continue;
+    }
+    // Se il testo dell'opzione contiene la stringa cercata, mostriamo
+    if (txt.indexOf(input) > -1) {
+      aziendaSelect.options[i].style.display = "";
+    } else {
+      aziendaSelect.options[i].style.display = "none";
+    }
+  }
+}
+
+/* -------------------------------------------------
+   NAVIGAZIONE STEP
+   ------------------------------------------------- */
+function goToStep1() {
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step3').classList.remove('active');
+}
+
+function goToStep2() {
+  // Recupera l'azienda selezionata
+  let aziendaSelect = document.getElementById('azienda_id');
+  if (!aziendaSelect.value) {
+    alert("Seleziona un'azienda!");
+    return;
+  }
+  selectedAziendaId = aziendaSelect.value;
+  selectedAziendaName = aziendaSelect.options[aziendaSelect.selectedIndex].text;
+
+  // Compiliamo i campi in step2 (card di sinistra)
+  document.getElementById('azienda_nome').textContent = selectedAziendaName;
+  document.getElementById('azienda_id_label').textContent = "ID: #" + selectedAziendaId;
+
+  // Dati extra memorizzati come attributi data-* nell'option
+  let email = aziendaSelect.options[aziendaSelect.selectedIndex].dataset.email || "";
+  let telefono = aziendaSelect.options[aziendaSelect.selectedIndex].dataset.telefono || "";
+  let cellulare = aziendaSelect.options[aziendaSelect.selectedIndex].dataset.cellulare || "";
+  let indirizzo = aziendaSelect.options[aziendaSelect.selectedIndex].dataset.indirizzo || "";
+
+  document.getElementById('azienda_email').textContent = email;
+  document.getElementById('azienda_telefono').textContent = telefono || cellulare;
+  document.getElementById('azienda_indirizzo').textContent = indirizzo;
+
+  // Imposto il campo hidden in Step2
+  document.getElementById('step2_azienda_id').value = selectedAziendaId;
+
+  // Mostro Step2, nascondo Step1 e Step3
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step2').classList.add('active');
+  document.getElementById('step3').classList.remove('active');
+}
+
+/* -------------------------------------------------
+   STEP 2: INVIO FILE EXCEL AL SERVER PER ANALISI
+   ------------------------------------------------- */
+function parseFile() {
+  let form = document.getElementById('uploadForm');
+  let formData = new FormData(form);
+
+  fetch(".", {
+    method: "POST",
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.error) {
+      alert("Errore: " + data.error);
+    } else if (data.success) {
+      // Abbiamo "nuovi" e "duplicati"
+      nuoviData = data.nuovi;
+      duplicatiData = data.duplicati;
+
+      // Aggiorniamo la UI dello step3
+      fillStep3Tables();
+
+      // Passiamo allo step3
+      document.getElementById('step1').classList.remove('active');
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('step3').classList.add('active');
+
+      document.getElementById('step3_azienda_name').innerText = selectedAziendaName;
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Si è verificato un errore durante l'analisi del file.");
+  });
+}
+
+function fillStep3Tables() {
+  // Riempie la tabella dei nuovi
+  let nuoviBody = document.querySelector('#nuoviTable tbody');
+  nuoviBody.innerHTML = "";
+  nuoviData.forEach(d => {
+    let row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${d.codicefiscale}</td>
+      <td>${d.livello_inq || ''}</td>
+      <td>${d.ore_effettuate || 0}</td>
+      <td>${d.retrib_oraria || 0}</td>
+      <td>${d.contrib_oraria || 0}</td>
+    `;
+    nuoviBody.appendChild(row);
+  });
+
+  // Riempie la tabella dei duplicati
+  let duplicatiBody = document.querySelector('#duplicatiTable tbody');
+  duplicatiBody.innerHTML = "";
+  duplicatiData.forEach(d => {
+    let row = document.createElement('tr');
+    row.innerHTML = `
+      <td><input type="checkbox" value="${d.dipendente_id}" class="dup-check"></td>
+      <td>${d.codicefiscale}</td>
+      <td>${d.livello_inq_attuale || ''}</td>
+      <td>${d.livello_inq_nuovo || ''}</td>
+      <td>${d.ore_effettuate || 0}</td>
+      <td>${d.retrib_oraria || 0}</td>
+      <td>${d.contrib_oraria || 0}</td>
+    `;
+    duplicatiBody.appendChild(row);
+  });
+}
+
+/* -------------------------------------------------
+   STEP 3: CONFERMA IMPORT
+   ------------------------------------------------- */
+function confirmImport() {
+  // L'utente conferma l'import. Preparo un form data con action=confirm_import
+  let formData = new FormData();
+  formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+  formData.append('action', 'confirm_import');
+  formData.append('azienda_id', selectedAziendaId);
+  formData.append('nuovi', JSON.stringify(nuoviData));
+  formData.append('duplicati', JSON.stringify(duplicatiData));
+
+  // Leggiamo i checkbox spuntati
+  let checked = document.querySelectorAll('.dup-check:checked');
+  checked.forEach(ch => {
+     formData.append('duplicati_update[]', ch.value);
+  });
+
+  fetch(".", {
+    method: "POST",
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.error) {
+      alert("Errore: " + data.error);
+    } else if (data.success) {
+      alert("Import completato con successo!");
+      // Potresti ridirigere altrove, per esempio:
+      window.location.href = "{% url 'lista_dipendenti' %}";
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Si è verificato un errore durante la conferma.");
+  });
+}
+</script>
+
+{% endblock content %}

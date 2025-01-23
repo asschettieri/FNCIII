@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ========== Page Title Start ========== -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">Lista Moduli</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="javascript: void(0);">Formazione</a></li>
+                <li class="breadcrumb-item active">Lista Moduli</li>
+            </ol>
+        </div>
+    </div>
+</div>
+<!-- ========== Page Title End ========== -->
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+             <div class="card-header border-0">
+                  <div class="row justify-content-between">
+                       <div class="col-lg-6">
+                            <div class="row align-items-center">
+                                 <div class="col-lg-6">
+                                      <!-- Ricerca moduli -->
+                                      <form class="app-search d-none d-md-block me-auto">
+                                           <div class="position-relative">
+                                                <input type="search" class="form-control" placeholder="Cerca Modulo" autocomplete="off" id="searchModuli">
+                                                <iconify-icon icon="solar:magnifer-broken" class="search-widget-icon"></iconify-icon>
+                                           </div>
+                                      </form>
+                                 </div>
+                                 <div class="col-lg-4">
+                                      <h5 class="text-dark fw-medium mb-0">
+                                          {{ moduli|length }}
+                                          <span class="text-muted">Moduli</span>
+                                      </h5>
+                                 </div>
+                            </div>
+                       </div>
+                       <div class="col-lg-6">
+                            <div class="text-md-end mt-3 mt-md-0">
+                                <!-- Bottone IMPOSTAZIONI -->
+                                <button type="button" class="btn btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#settingsModalModuli">
+                                    <i class="ri-settings-2-line me-1"></i> Impostazioni
+                                </button>
+
+                                <!-- Bottone FILTRA -->
+                                <button type="button" class="btn btn-outline-primary me-1" id="toggleFiltersBtnModuli">
+                                    <i class="ri-filter-line me-1"></i> Filtri
+                                </button>
+
+                                <!-- Link a "crea_modulo" -->
+                                <a href="{% url 'crea_modulo' %}" class="btn btn-success me-1">
+                                    <i class="ri-add-line"></i> Nuovo Modulo
+                                </a>
+                            </div>
+                       </div>
+                  </div>
+             </div>
+        </div>
+   </div>
+</div>
+
+<div class="col-xl-12">
+     <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+               <h4 class="card-title mb-0">Elenco Moduli</h4>
+               <div class="dropdown">
+                    <a href="#" class="dropdown-toggle btn btn-sm btn-outline-light rounded" data-bs-toggle="dropdown" aria-expanded="false">
+                         Questa Settimana
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end">
+                         <a href="#!" class="dropdown-item">Download</a>
+                         <a href="#!" class="dropdown-item">Export</a>
+                         <a href="#!" class="dropdown-item">Import</a>
+                    </div>
+               </div>
+          </div>
+
+          <!-- Tabella MODULI -->
+          <div class="table-responsive">
+            <table class="table align-middle text-nowrap table-hover table-centered mb-0" id="moduliTable">
+                <thead class="bg-light-subtle">
+                    <tr>
+                        <!-- Checkbox multipla -->
+                        <th class="col-select" style="width:20px;">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="checkAllModuli">
+                                <label class="form-check-label" for="checkAllModuli"></label>
+                            </div>
+                        </th>
+                        <th class="col-id">ID</th>
+                        <th class="col-nome">Nome Modulo</th>
+                        <th class="col-desc">Descrizione</th>
+                        <th class="col-azioni">Azioni</th>
+                    </tr>
+                    <!-- RIGA FILTRI (inizialmente nascosta) -->
+                    <tr class="filters-row-moduli" style="display: none;">
+                        <th></th>
+                        <th><input type="text" class="form-control filter-input-moduli" data-col="col-id" placeholder="Filtra ID"></th>
+                        <th><input type="text" class="form-control filter-input-moduli" data-col="col-nome" placeholder="Filtra Nome"></th>
+                        <th><input type="text" class="form-control filter-input-moduli" data-col="col-desc" placeholder="Filtra Descrizione"></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for modulo in moduli %}
+                    <tr>
+                        <td class="col-select">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="checkMod{{ forloop.counter }}">
+                                <label class="form-check-label" for="checkMod{{ forloop.counter }}">&nbsp;</label>
+                            </div>
+                        </td>
+                        <td class="col-id">{{ modulo.id }}</td>
+                        <td class="col-nome">{{ modulo.nome }}</td>
+                        <!-- Mostriamo solo un estratto della descrizione (ad es. 80 caratteri) -->
+                        <td class="col-desc">
+                            {% if modulo.descrizione %}
+                                {{ modulo.descrizione|slice:":80" }}{% if modulo.descrizione|length > 80 %}...{% endif %}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="col-azioni">
+                            <div class="d-flex gap-2">
+                                <!-- Modifica -->
+                                <a href="{% url 'modifica_modulo' modulo.id %}" class="btn btn-soft-primary btn-sm" title="Modifica Modulo">
+                                    <iconify-icon icon="solar:pen-2-broken" class="align-middle fs-18"></iconify-icon>
+                                </a>
+                                <!-- Elimina -->
+                                <button onclick="confirmDeleteModulo('{% url 'modulo_elimina' modulo.id %}')" 
+                                        class="btn btn-soft-danger btn-sm" title="Elimina Modulo">
+                                    <iconify-icon icon="solar:trash-bin-minimalistic-2-broken" class="align-middle fs-18"></iconify-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+          </div>
+
+          <div class="card-footer">
+               <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-end mb-0">
+                         <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                         <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                         <li class="page-item"><a class="page-link" href="#">2</a></li>
+                         <li class="page-item"><a class="page-link" href="#">3</a></li>
+                         <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                    </ul>
+               </nav>
+          </div>
+     </div>
+</div>
+
+<!-- MODAL Impostazioni MODULI -->
+<div class="modal fade" id="settingsModalModuli" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="columnSettingsFormModuli">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Impostazioni Colonne (Moduli)</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          <p>Seleziona/deseleziona le colonne da mostrare:</p>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox-moduli" type="checkbox" value="col-id" id="checkIdMod" checked>
+            <label class="form-check-label" for="checkIdMod">ID Modulo</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox-moduli" type="checkbox" value="col-nome" id="checkNomeMod" checked>
+            <label class="form-check-label" for="checkNomeMod">Nome Modulo</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox-moduli" type="checkbox" value="col-desc" id="checkDescMod" checked>
+            <label class="form-check-label" for="checkDescMod">Descrizione</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox-moduli" type="checkbox" value="col-azioni" id="checkAzioniMod" checked>
+            <label class="form-check-label" for="checkAzioniMod">Azioni</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+          <button type="submit" class="btn btn-primary">Applica modifiche</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Script SweetAlert2 per conferma cancellazione -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  // Funzione di conferma eliminazione
+  function confirmDeleteModulo(urlElimina) {
+      Swal.fire({
+          title: 'Sei sicuro?',
+          text: "Vuoi eliminare questo modulo?",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sì, elimina!',
+          cancelButtonText: 'Annulla'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              window.location.href = urlElimina;
+          }
+      });
+  }
+
+  // Bottone FILTRA (mostra/nasconde riga filtri)
+  const toggleFiltersBtn = document.getElementById('toggleFiltersBtnModuli');
+  const filtersRow = document.querySelector('.filters-row-moduli');
+
+  toggleFiltersBtn.addEventListener('click', () => {
+      if (filtersRow.style.display === 'none' || filtersRow.style.display === '') {
+          filtersRow.style.display = 'table-row';
+      } else {
+          filtersRow.style.display = 'none';
+      }
+  });
+
+  // Filtraggio per colonna
+  const filterInputs = document.querySelectorAll('.filter-input-moduli');
+  filterInputs.forEach(input => {
+      input.addEventListener('input', () => {
+          let colClass = input.getAttribute('data-col');
+          let filterValue = input.value.toLowerCase();
+
+          const rows = document.querySelectorAll('#moduliTable tbody tr');
+          rows.forEach(row => {
+              const td = row.querySelector('.' + colClass);
+              if (!td) return;
+              let tdText = td.innerText.toLowerCase();
+              if (tdText.includes(filterValue)) {
+                  row.style.display = '';
+              } else {
+                  row.style.display = 'none';
+              }
+          });
+      });
+  });
+
+  // Impostazioni colonne (toggle colonna ON/OFF)
+  const columnCheckboxes = document.querySelectorAll('.column-checkbox-moduli');
+  const columnSettingsForm = document.getElementById('columnSettingsFormModuli');
+
+  columnSettingsForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      columnCheckboxes.forEach(checkbox => {
+          const colClass = checkbox.value;
+          const checked = checkbox.checked;
+          const colElements = document.querySelectorAll('.' + colClass);
+          colElements.forEach(el => {
+              el.style.display = checked ? '' : 'none';
+          });
+      });
+
+      // Chiudi il modal
+      let myModalEl = document.getElementById('settingsModalModuli');
+      let modal = bootstrap.Modal.getInstance(myModalEl);
+      modal.hide();
+
+      // Alert
+      Swal.fire({
+          icon: 'info',
+          title: 'Tabella aggiornata',
+          text: 'La tabella Moduli è stata aggiornata con le nuove impostazioni di colonna.'
+      });
+  });
+
+  // Ricerca testuale generica (sulla colonna Nome/Descrizione, se vuoi)
+  const searchInput = document.getElementById('searchModuli');
+  searchInput.addEventListener('input', () => {
+      let query = searchInput.value.toLowerCase();
+      const rows = document.querySelectorAll('#moduliTable tbody tr');
+      rows.forEach(row => {
+          let rowText = row.innerText.toLowerCase();
+          if (rowText.includes(query)) {
+              row.style.display = '';
+          } else {
+              row.style.display = 'none';
+          }
+      });
+  });
+</script>
+
+{% endblock content %}

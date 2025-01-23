@@ -1,0 +1,164 @@
+<!-- aziende/azienda_crud.html -->
+
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">{% if azienda %}Modifica Dettagli Azienda{% else %}Inserisci Nuova Azienda{% endif %}</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'lista_aziende' %}">Lista Aziende</a></li>
+                <li class="breadcrumb-item active">{% if azienda %}Modifica Azienda{% else %}Nuova Azienda{% endif %}</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<form method="post" action="{% if azienda and azienda.id %}{% url 'modifica_azienda' azienda.id %}{% else %}{% url 'crea_azienda' %}{% endif %}">
+    {% csrf_token %}
+    <div class="row">
+        <!-- Sezione Informazioni Generali -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-light-subtle">
+                    <h4 class="card-title">Informazioni Generali</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="azienda" class="form-label">Nome Azienda</label>
+                        <input type="text" id="azienda" name="azienda" class="form-control" value="{{ azienda.nome|default:"" }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="partitaiva" class="form-label">Partita IVA</label>
+                        <input type="text" id="partitaiva" name="partitaiva" class="form-control" value="{{ azienda.partitaiva|default:"" }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="codiceateco" class="form-label">Codice Ateco</label>
+                        <select id="codiceateco" name="codiceateco" class="form-control">
+                            <option value="">-- Seleziona Codice Ateco --</option>
+                            {% for ateco in codici_ateco %}
+                                <option value="{{ ateco.id }}" {% if azienda.codiceateco and azienda.codiceateco.id == ateco.id %}selected{% endif %}>
+                                    {{ ateco.codice }} - {{ ateco.descrizione }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="formagiuridica" class="form-label">Forma Giuridica</label>
+                        <input type="text" id="formagiuridica" name="formagiuridica" class="form-control" value="{{ azienda.formagiuridica|default:"" }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sezione Contatti -->
+            <div class="card">
+                <div class="card-header bg-light-subtle">
+                    <h4 class="card-title">Contatti</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label">Telefono</label>
+                        <input type="text" id="telefono" name="telefono" class="form-control" value="{{ azienda.telefono|default:"" }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="cellulare" class="form-label">Cellulare</label>
+                        <input type="text" id="cellulare" name="cellulare" class="form-control" value="{{ azienda.cellulare|default:"" }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" value="{{ azienda.email|default:"" }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="pec" class="form-label">PEC</label>
+                        <input type="email" id="pec" name="pec" class="form-control" value="{{ azienda.pec|default:"" }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sezione Sedi e Note -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-light-subtle">
+                    <h4 class="card-title">Sedi Aziendali</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="indirizzosl" class="form-label">Sede Legale</label>
+                        <textarea id="indirizzosl" name="indirizzosl" class="form-control" required>{{ azienda.indirizzosl|default:"" }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="indirizzoso" class="form-label">Sede Operativa</label>
+                        <textarea id="indirizzoso" name="indirizzoso" class="form-control">{{ azienda.indirizzoso|default:"" }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="indirizzolr" class="form-label">Luogo Rappresentante</label>
+                        <textarea id="indirizzolr" name="indirizzolr" class="form-control">{{ azienda.indirizzolr|default:"" }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-light-subtle">
+                    <h4 class="card-title">Note Aziendali</h4>
+                </div>
+                <div class="card-body">
+                    <textarea id="note" name="note" class="form-control" rows="4">{{ azienda.note|default:"" }}</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pulsanti di Salvataggio -->
+    <div class="row justify-content-end mt-3">
+        <div class="col-lg-2">
+            <button type="submit" class="btn btn-primary w-100" onclick="return confirmSave()">Salva</button>
+        </div>
+        <div class="col-lg-2">
+            <a href="{% url 'lista_aziende' %}" class="btn btn-danger w-100" onclick="return confirmCancel()">Annulla</a>
+        </div>
+    </div>
+</form>
+
+<!-- Script SweetAlert2 per le conferme -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function confirmSave(event) {
+        // Blocca l'invio del form e mostra la conferma
+        event.preventDefault();
+        Swal.fire({
+            title: 'Sei sicuro?',
+            text: "Vuoi salvare le modifiche a questa azienda?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sì, salva!',
+            cancelButtonText: 'Annulla'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Se confermato, invia il form
+                event.target.closest('form').submit();
+            }
+        });
+        return false;  // Previene l'invio immediato
+    }
+
+    function confirmCancel(event) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Sei sicuro?',
+            text: "Vuoi annullare le modifiche?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sì, annulla!',
+            cancelButtonText: 'Torna indietro'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Se confermato, reindirizza alla lista aziende
+                window.location.href = "{% url 'lista_aziende' %}";
+            }
+        });
+        return false;  // Previene il comportamento predefinito
+    }
+</script>
+{% endblock content %}

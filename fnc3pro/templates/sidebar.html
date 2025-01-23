@@ -1,0 +1,194 @@
+{% load static %}
+<div class="main-nav">
+     <!-- Sidebar Logo -->
+     <div class="logo-box">
+          <a href="index.html" class="logo-dark">
+              <img src="{% static 'images/logo-sm.png' %}" class="logo-sm" alt="logo sm" style="transform: scale(1.2);">
+              <img src="{% static 'images/logo-light.png' %}" class="logo-lg" alt="logo dark" style="transform: scale(1.2);">
+          </a>
+      
+          <a href="index.html" class="logo-light">
+              <img src="{% static 'images/logo-sm.png' %}" class="logo-sm" alt="logo sm" style="transform: scale(1.2);">
+              <img src="{% static 'images/logo-light.png' %}" class="logo-lg" alt="logo dark" style="transform: scale(1.2);">
+          </a>
+      </div>
+      
+
+     <!-- Menu Toggle Button (sm-hover) -->
+     <button type="button" class="button-sm-hover" aria-label="Show Full Sidebar">
+          <i class="ri-menu-2-line fs-24 button-sm-hover-icon"></i>
+     </button>
+
+     <div class="scrollbar" data-simplebar>
+
+          <ul class="navbar-nav" id="navbar-nav">
+
+               <li class="menu-title">Menu</li>
+
+               <li class="nav-item">
+                    <a class="nav-link menu-arrow" href="#sidebarDashboards" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarDashboards">
+                         <span class="nav-icon">
+                              <i class="ri-dashboard-2-line"></i>
+                         </span>
+                         <span class="nav-text"> Dashboards </span>
+                    </a>
+                    <div class="collapse" id="sidebarDashboards">
+                         <ul class="nav sub-navbar-nav">
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="index.html">Analytics</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="dashboard-agent.html">Agent</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="dashboard-customer.html">Customer</a>
+                              </li>
+                         </ul>
+                    </div>
+               </li>
+
+               <li class="nav-item">
+                    <a class="nav-link menu-arrow" href="#sidebarAziende" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAziende">
+                        <span class="nav-icon">
+                            <i class="ri-community-line"></i>
+                        </span>
+                        <span class="nav-text"> Aziende </span>
+                    </a>
+                    <div class="collapse" id="sidebarAziende">
+                        <ul class="nav sub-navbar-nav">
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'lista_aziende' %}">Lista Aziende</a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'crea_azienda' %}">Aggiungi Azienda</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li> <!-- end Aziende Menu -->
+                
+
+                <li class="nav-item">
+                    <a class="nav-link menu-arrow" href="#sidebarAgents" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAgents">
+                        <span class="nav-icon">
+                            <i class="ri-group-line"></i>
+                        </span>
+                        <span class="nav-text"> Dipendenti </span>
+                    </a>
+                    <div class="collapse" id="sidebarAgents">
+                        <ul class="nav sub-navbar-nav">
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'lista_dipendenti' %}">Lista Dipendenti</a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'crea_dipendente' %}">Aggiungi Dipendenti</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link menu-arrow" href="#sidebarTables" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarTables">
+                         <span class="nav-icon">
+                              <i class="ri-news-line"></i>
+                         </span>
+                         <span class="nav-text"> Progetti </span>
+                    </a>
+                    <div class="collapse" id="sidebarTables">
+                         <ul class="nav sub-navbar-nav">
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="{% url 'lista_progetti' %}">Lista Progetti</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="{% url 'lista_pianiformativi' %}">Lista Piani Formativi</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="{% url 'lista_moduli' %}">Lista Muduli</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="{% url 'wizard_propiani' %}">Wizard Associazioni</a>
+                              </li>
+                         </ul>
+                    </div>
+                </li>
+                
+               <li class="menu-title">Custom</li>
+
+               <li class="nav-item">
+                    <a class="nav-link menu-arrow" href="#sidebarPages" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarPages">
+                         <span class="nav-icon">
+                              <i class="ri-pages-line"></i>
+                         </span>
+                         <span class="nav-text"> Pages </span>
+                    </a>
+                    <div class="collapse" id="sidebarPages">
+                         <ul class="nav sub-navbar-nav">
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="pages-starter.html">Welcome</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="pages-calendar.html">Calendar</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="pages-invoice.html">Invoice</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="pages-faqs.html">FAQs</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="pages-comingsoon.html">Coming Soon</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="pages-timeline.html">Timeline</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="pages-pricing.html">Pricing</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="pages-maintenance.html">Maintenance</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="pages-404.html">404 Error</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="pages-404-alt.html">404 Error (alt)</a>
+                              </li>
+                         </ul>
+                    </div>
+               </li> <!-- end Pages Menu -->
+
+               <li class="nav-item">
+                    <a class="nav-link menu-arrow" href="#sidebarAuthentication" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAuthentication">
+                         <span class="nav-icon">
+                              <i class="ri-lock-password-line"></i>
+                         </span>
+                         <span class="nav-text"> Authentication </span>
+                    </a>
+                    <div class="collapse" id="sidebarAuthentication">
+                         <ul class="nav sub-navbar-nav">
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="auth-signin.html">Sign In</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="auth-signup.html">Sign Up</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="auth-password.html">Reset Password</a>
+                              </li>
+                              <li class="sub-nav-item">
+                                   <a class="sub-nav-link" href="auth-lock-screen.html">Lock Screen</a>
+                              </li>
+                         </ul>
+                    </div>
+               </li>
+
+               <li class="nav-item">
+                    <a class="nav-link disabled" href="javascript:void(0);">
+                         <span class="nav-icon">
+                              <i class="ri-prohibited-2-line"></i>
+                         </span>
+                         <span class="nav-text"> Disable Item </span>
+                    </a>
+               </li> <!-- end Demo Menu Item -->
+          </ul>
+     </div>
+</div>

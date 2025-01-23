@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">Dettagli Azienda</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'lista_aziende' %}">Lista Aziende</a>
+                </li>
+                <li class="breadcrumb-item active">Genera Allegato 2 Bis</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Colonna sinistra: Informazioni azienda -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5>Informazioni sull'Azienda</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nome:</strong> {{ azienda.nome }}</p>
+                    <p><strong>Partita IVA:</strong> {{ azienda.partitaiva }}</p>
+                    <p><strong>Codice ATECO:</strong>
+                        {% if azienda.codiceateco %}
+                            {{ azienda.codiceateco.codice }}
+                        {% else %}
+                            --
+                        {% endif %}
+                    </p>
+                    <p><strong>Email:</strong> {{ azienda.email }}</p>
+                    <p><strong>Telefono:</strong> {{ azienda.telefono }}</p>
+                    <p><strong>Cellulare:</strong> {{ azienda.cellulare }}</p>
+                    <p><strong>Indirizzo Sede Legale:</strong> {{ azienda.indirizzosl }}</p>
+                    <p><strong>Note:</strong> {{ azienda.note }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonna destra: Step di verifica -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5>Verifica Processi</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <!-- Check azienda caricata -->
+                        <li>
+                            {% if azienda %}
+                            <div class="alert alert-success alert-icon d-flex align-items-center" role="alert">
+                                <div class="avatar-sm rounded bg-success d-flex justify-content-center align-items-center fs-18 me-2">
+                                    <i class="bx bx-check-shield text-white"></i>
+                                </div>
+                                <div class="flex-grow-1 d-flex justify-content-between w-100">
+                                    Azienda caricata
+                                    <a href="{% url 'modifica_azienda' azienda.id %}" class="btn btn-sm btn-link">
+                                        Modifica Azienda
+                                    </a>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-danger alert-icon d-flex align-items-center" role="alert">
+                                <div class="avatar-sm rounded bg-danger d-flex justify-content-center align-items-center fs-18 me-2">
+                                    <i class="bx bx-info-circle text-white"></i>
+                                </div>
+                                <div class="flex-grow-1 d-flex justify-content-between w-100">
+                                    Azienda non caricata
+                                    <a href="{% url 'crea_azienda' %}" class="btn btn-sm btn-link">Crea Azienda</a>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </li>
+
+                        <!-- Check dipendenti associati -->
+                        <li>
+                            {% if dipendenti and dipendenti|length > 0 %}
+                            <div class="alert alert-success alert-icon d-flex align-items-center" role="alert">
+                                <div class="avatar-sm rounded bg-success d-flex justify-content-center align-items-center fs-18 me-2">
+                                    <i class="bx bx-check-shield text-white"></i>
+                                </div>
+                                <div class="flex-grow-1 d-flex justify-content-between w-100">
+                                    Dipendenti associati
+                                    <a href="{% url 'azienda_dipendenti' azienda.id %}" class="btn btn-sm btn-link">
+                                        Visualizza Dipendenti
+                                    </a>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-danger alert-icon d-flex align-items-center" role="alert">
+                                <div class="avatar-sm rounded bg-danger d-flex justify-content-center align-items-center fs-18 me-2">
+                                    <i class="bx bx-info-circle text-white"></i>
+                                </div>
+                                <div class="flex-grow-1 d-flex justify-content-between w-100">
+                                    Nessun dipendente associato
+                                    <a href="{% url 'crea_dipendente' %}" class="btn btn-sm btn-link">Aggiungi Dipendenti</a>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </li>
+
+                        <!-- Check piani formativi -->
+                        <li>
+                            {% if piani and piani|length > 0 %}
+                            <div class="alert alert-success alert-icon d-flex align-items-center" role="alert">
+                                <div class="avatar-sm rounded bg-success d-flex justify-content-center align-items-center fs-18 me-2">
+                                    <i class="bx bx-check-shield text-white"></i>
+                                </div>
+                                <div class="flex-grow-1 d-flex justify-content-between w-100">
+                                    Piani formativi associati
+                                    <a href="{% url 'lista_pianiformativi' %}" class="btn btn-sm btn-link">
+                                        Visualizza Piani
+                                    </a>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-danger alert-icon d-flex align-items-center" role="alert">
+                                <div class="avatar-sm rounded bg-danger d-flex justify-content-center align-items-center fs-18 me-2">
+                                    <i class="bx bx-info-circle text-white"></i>
+                                </div>
+                                <div class="flex-grow-1 d-flex justify-content-between w-100">
+                                    Nessun piano formativo associato
+                                    <a href="{% url 'crea_pianoformativo' %}" class="btn btn-sm btn-link">
+                                        Aggiungi Piano Formativo
+                                    </a>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </li>
+
+                        <!-- Check ore lavorative -->
+                        <li>
+                            {% if ore_lavorative_verificate %}
+                            <div class="alert alert-success alert-icon d-flex align-items-center" role="alert">
+                                <div class="avatar-sm rounded bg-success d-flex justify-content-center align-items-center fs-18 me-2">
+                                    <i class="bx bx-check-shield text-white"></i>
+                                </div>
+                                <div class="flex-grow-1 d-flex justify-content-between w-100">
+                                    Ore lavorative verificate
+                                    {% if dipendenti and dipendenti|length > 0 %}
+                                    <a href="{% url 'dipendenti_details' dipendenti.0.id %}" class="btn btn-sm btn-link">
+                                        Verifica Dettagli
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-danger alert-icon d-flex align-items-center" role="alert">
+                                <div class="avatar-sm rounded bg-danger d-flex justify-content-center align-items-center fs-18 me-2">
+                                    <i class="bx bx-info-circle text-white"></i>
+                                </div>
+                                <div class="flex-grow-1 d-flex justify-content-between w-100">
+                                    Ore lavorative non verificate
+                                    {% if dipendenti and dipendenti|length > 0 %}
+                                    <a href="{% url 'dipendenti_details' dipendenti.0.id %}" class="btn btn-sm btn-link">
+                                        Verifica Ore
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Dropdown per scegliere il moltiplicatore -->
+            <div class="card mt-3">
+                <div class="card-body text-center">
+                    <form method="get" action="">
+                        <label for="moltiplicatore" class="me-2">
+                            Moltiplicazione Totale quota di retribuzione oraria:
+                        </label>
+                        <select name="moltiplicatore" id="moltiplicatore"
+                                class="form-select d-inline-block w-auto me-2">
+                            <option value="">-- Seleziona --</option>
+                            <option value="0.6" {% if moltiplicatore == "0.6" %}selected{% endif %}>0.6</option>
+                            <option value="0.8" {% if moltiplicatore == "0.8" %}selected{% endif %}>0.8</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">
+                            Imposta
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bottone Genera Allegato -->
+            <div class="card mt-3">
+                <div class="card-body text-center">
+                    {% if azienda and dipendenti|length > 0 and piani|length > 0 and ore_lavorative_verificate and moltiplicatore %}
+                        <a href="{% url 'genera_allegato2bis' azienda.id %}?moltiplicatore={{ moltiplicatore }}"
+                           class="btn btn-success btn-lg">
+                            <i class="bi bi-download"></i> Genera Allegato
+                        </a>
+                    {% else %}
+                        <button class="btn btn-secondary btn-lg" disabled>
+                            <i class="bi bi-download"></i> Genera Allegato (Impossibile)
+                        </button>
+                        <div class="alert alert-warning mt-3">
+                            <strong>Prerequisiti mancanti:</strong>
+                            <ul class="text-start">
+                                {% if not azienda %}
+                                <li>L'azienda non è stata caricata correttamente.</li>
+                                {% endif %}
+                                {% if not dipendenti or dipendenti|length == 0 %}
+                                <li>Non ci sono dipendenti associati all'azienda.</li>
+                                {% endif %}
+                                {% if not piani or piani|length == 0 %}
+                                <li>Non ci sono piani formativi associati ai dipendenti.</li>
+                                {% endif %}
+                                {% if not ore_lavorative_verificate %}
+                                <li>Le ore lavorative dei dipendenti non sono state verificate o completate.</li>
+                                {% endif %}
+                                {% if not moltiplicatore %}
+                                <li>Non hai selezionato un moltiplicatore (0.6 o 0.8).</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

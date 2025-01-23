@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Conferma importazione per l'azienda: {{ azienda.nome }}</h1>
+    
+<h2>Nuovi dipendenti (verranno creati automaticamente):</h2>
+{% if nuovi %}
+    <table border="1" cellpadding="5" cellspacing="0">
+        <tr>
+            <th>Codice Fiscale</th>
+            <th>Livello Inquadr.</th>
+            <th>Ore</th>
+            <th>Retrib.Oraria</th>
+            <th>Contrib.Oraria</th>
+        </tr>
+        {% for d in nuovi %}
+        <tr>
+            <td>{{ d.codicefiscale }}</td>
+            <td>{{ d.livello_inq }}</td>
+            <td>{{ d.ore_effettuate }}</td>
+            <td>{{ d.retrib_oraria }}</td>
+            <td>{{ d.contrib_oraria }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>Nessun nuovo dipendente.</p>
+{% endif %}
+
+<h2>Dipendenti duplicati (stesso CF già presente):</h2>
+<form method="POST" action="">
+    {% csrf_token %}
+    <table border="1" cellpadding="5" cellspacing="0">
+        <tr>
+            <th>Seleziona Aggiornamento</th>
+            <th>Codice Fiscale</th>
+            <th>Livello Inq. Attuale</th>
+            <th>Livello Inq. Nuovo</th>
+            <th>Ore (nuove)</th>
+            <th>Retrib. Oraria (nuova)</th>
+            <th>Contrib. Oraria (nuova)</th>
+        </tr>
+        {% for dup in duplicati %}
+        <tr>
+            <td align="center">
+                <!-- Passiamo l'ID del dipendente esistente come value -->
+                <input type="checkbox" name="aggiorna_duplicato" value="{{ dup.dipendente_id }}">
+            </td>
+            <td>{{ dup.codicefiscale }}</td>
+            <td>{{ dup.livello_inq_attuale }}</td>
+            <td>{{ dup.livello_inq_nuovo }}</td>
+            <td>{{ dup.ore_effettuate }}</td>
+            <td>{{ dup.retrib_oraria }}</td>
+            <td>{{ dup.contrib_oraria }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <p style="margin-top:20px;">
+        Seleziona i dipendenti di cui vuoi aggiornare i dati, poi premi "Conferma".
+    </p>
+    <button type="submit">Conferma</button>
+</form>
+
+
+{% enblock content%}

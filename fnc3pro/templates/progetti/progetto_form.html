@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+{% block title %}Gestisci Progetto{% endblock %}
+
+{% block content %}
+<style>
+    .form-group {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+    }
+    
+    fieldset {
+        border: 1px solid #cccccc;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        border-radius: 0.5rem;
+        background: #f9f9f9;
+    }
+
+    fieldset legend {
+        width: auto;
+        padding: 0 10px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        background: #FF5757;
+        color: #fff;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title">Gestisci Progetto</h4>
+            </div>
+            <div class="card-body">
+                <form action="." method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <h3 class="mb-2 font-weight-bold">Gestisci Progetto</h3>
+                    <p class="mb-4">Compila i campi sottostanti per creare o modificare un progetto.</p>
+
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <p>Si prega di correggere i seguenti errori:</p>
+                            <ul>
+                                {% for field in form %}
+                                    {% if field.errors %}
+                                        {% for error in field.errors %}
+                                            <li><b>{{ field.label }}:</b> {{ error|striptags }}</li>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    {% if piani_formativi.errors %}
+                        <div class="alert alert-danger">
+                            <p>Si prega di correggere i seguenti errori:</p>
+                            <ul>
+                                {% for field in piani_formativi %}
+                                    {% if field.errors %}
+                                        {% for error in field.errors %}
+                                            <li><b>{{ field.label }}:</b> {{ error|striptags }}</li>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>  
+                    {% endif %}
+
+                    <div class="row">
+                        {% for field in form %}
+                        <div class="col-md-12 mb-3">
+                            <div class="form-group">
+                                {{ field.label_tag }}
+                                {{ field }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <fieldset>
+                        <div class="d-flex justify-content-between mb-2">
+                            <legend>Piani Formativi</legend>
+                            <button class="btn btn-success rounded-pill" type="button" onclick="addForm('piani_formativi')">+</button>
+                        </div>
+                        <div class="piani_formativi-formset">
+                            {{ piani_formativi.management_form }}
+                            <div class="piani_formativi-formset-container">
+                                {% for form in piani_formativi %}
+                                    <div class="dynamic-form p-3 mb-3 border rounded bg-white">
+                                        <div class="row align-items-center">
+                                            {% if form.id %}{{ form.id }}{% endif %}
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    {{ form.nome.label_tag }}
+                                                    {{ form.nome }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    {{ form.data_inizio.label_tag }}
+                                                    {{ form.data_inizio }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    {{ form.data_fine.label_tag }}
+                                                    {{ form.data_fine }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    {{ form.ore_totali.label_tag }}
+                                                    {{ form.ore_totali }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    {{ form.fondo.label_tag }}
+                                                    {{ form.fondo }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    {{ form.descrizione.label_tag }}
+                                                    {{ form.descrizione }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    {{ form.moduli.label_tag }}
+                                                    {{ form.moduli }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                {% if form.instance.pk %}
+                                                    <label for="{{ form.prefix }}-DELETE">Elimina:</label>
+                                                    {{ form.DELETE }}
+                                                {% else %}
+                                                    <button type="button" class="btn btn-danger" onclick="removeForm(this, 'piani_formativi')">Rimuovi</button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div class="empty-form d-none">
+                                <div class="dynamic-form p-3 mb-3 border rounded bg-white">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                {{ piani_formativi.empty_form.nome.label_tag }}
+                                                {{ piani_formativi.empty_form.nome }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                {{ piani_formativi.empty_form.data_inizio.label_tag }}
+                                                {{ piani_formativi.empty_form.data_inizio }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                {{ piani_formativi.empty_form.data_fine.label_tag }}
+                                                {{ piani_formativi.empty_form.data_fine }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                {{ piani_formativi.empty_form.ore_totali.label_tag }}
+                                                {{ piani_formativi.empty_form.ore_totali }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                {{ piani_formativi.empty_form.descrizione.label_tag }}
+                                                {{ piani_formativi.empty_form.descrizione }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                {{ piani_formativi.empty_form.fondo.label_tag }}
+                                                {{ piani_formativi.empty_form.fondo }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                {{ piani_formativi.empty_form.moduli.label_tag }}
+                                                {{ piani_formativi.empty_form.moduli }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-danger" onclick="removeForm(this, 'piani_formativi')">Rimuovi</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <button class="btn btn-primary btn-block py-2 mb-4 mt-5 fw500 w-100" type="submit">Salva</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dualListboxInstances = {};
+
+    function initializeDualListBox(selector, url) {
+        const selectElement = $(selector);
+
+        const instanceId = selectElement.attr('id');
+        if (dualListboxInstances[instanceId]) {
+            console.log("cisadodsa")
+            return;
+        }
+        
+        function loadMoreData(term = '', page = 1) {
+            return $.ajax({
+                url: url,
+                data: {
+                    term: term,
+                    page: page,
+                },
+                dataType: 'json',
+            });
+        }
+
+        const dualListBoxInstance = selectElement.bootstrapDualListbox({
+            moveOnSelect: true,
+            filterPlaceHolder: 'Filtra',
+            moveSelectedLabel: 'Sposta selezionati',
+            moveAllLabel: 'Sposta tutti',
+            removeSelectedLabel: 'Rimuovi selezionati',
+            removeAllLabel: 'Rimuovi tutti',
+            infoText: 'Mostra tutti {0}',
+            infoTextEmpty: 'Lista vuota',
+            infoTextFiltered: '<span class="text-danger">Filtrati: {0}</span>',
+            noMatches: 'Nessuna corrispondenza trovata',
+        });
+
+        dualListboxInstances[instanceId] = dualListBoxInstance;
+        console.log(dualListboxInstances)
+        console.log(dualListboxInstances[instanceId])
+
+        const nonSelectedList = selectElement
+            .next('.bootstrap-duallistbox-container')
+            .find('.box1');
+        let currentPage = 1;
+        let isLoading = false;
+
+        nonSelectedList.on('scroll', function () {
+            if (isLoading) return;
+
+            const currentList = $(this);
+            const scrollHeight = currentList[0].scrollHeight;
+            const scrollTop = currentList.scrollTop();
+            const offsetHeight = currentList[0].offsetHeight;
+
+            if (scrollTop + offsetHeight >= scrollHeight - 10) {
+                isLoading = true;
+                currentPage += 1;
+
+                const searchTerm = selectElement
+                    .closest('.bootstrap-duallistbox-container')
+                    .find('.filter')
+                    .val();
+
+                loadMoreData(searchTerm, currentPage)
+                    .done((data) => {
+                        if (data.results && data.results.length > 0) {
+                            data.results.forEach((item) => {
+                                selectElement.append(
+                                    new Option(item.text, item.id, false, false)
+                                );
+                            });
+                            selectElement.bootstrapDualListbox('refresh');
+                        }
+                        if (!data.pagination.more) {
+                            isLoading = false;
+                        }
+                    })
+                    .fail(() => {
+                        isLoading = false;
+                    });
+            }
+        });
+
+        selectElement
+            .closest('div')
+            .find('input.filter')
+            .on('input change', function () {
+                console.log("ciaoa")
+                const searchTerm = $(this).val();
+                currentPage = 1;
+                selectElement.find('option').remove();
+                loadMoreData(searchTerm, currentPage).done((data) => {
+                    if (data.results && data.results.length > 0) {
+                        data.results.forEach((item) => {
+                            selectElement.append(
+                                new Option(item.text, item.id, false, false)
+                            );
+                        });
+                        selectElement.bootstrapDualListbox('refresh');
+                    }
+                });
+            });
+        
+        $('.moveall').html('<i class="bi bi-chevron-double-right"></i>');
+        $('.move').html('<i class="bi bi-chevron-right"></i>');
+        $('.removeall').html('<i class="bi bi-chevron-double-left"></i>');
+        $('.remove').html('<i class="bi bi-chevron-left"></i>');
+    }
+
+    function addForm(formsetName) {
+        const formset = document.querySelector(`.${formsetName}-formset`);
+        const totalForms = formset.querySelector(`#id_${formsetName}-TOTAL_FORMS`);
+        if (totalForms) {
+            const currentFormsCount = formset.querySelectorAll('.dynamic-form:not(.empty-form)').length - 1;
+            const newFormIdx = currentFormsCount;
+
+            const newFormHtml = formset.querySelector('.empty-form').innerHTML.replace(/__prefix__/g, newFormIdx);
+            const newFormDiv = document.createElement('div');
+            newFormDiv.classList.add(`formset-${newFormIdx}`);
+            newFormDiv.innerHTML = newFormHtml;
+
+            //initializeDualListBox(newFormDiv.querySelector('[id^="id_piani_formativi-"][id$="-moduli"]'));
+
+            formset.querySelector(`.${formsetName}-formset-container`).appendChild(newFormDiv);
+            totalForms.value = parseInt(totalForms.value) + 1;
+        }
+    }
+
+    function removeForm(button, formsetName) {
+        const formGroup = button.closest('.dynamic-form');
+        formGroup.remove();
+
+        const formset = document.querySelector(`.${formsetName}-formset`);
+        const totalForms = formset.querySelector(`#id_${formsetName}-TOTAL_FORMS`);
+        totalForms.value = parseInt(totalForms.value) - 1;
+    }
+
+    $(document).ready(function () {
+            
+        const aziendaSelector = document.querySelector('#id_aziende');
+        if (aziendaSelector) {
+            initializeDualListBox(aziendaSelector, "{% url 'search_azienda' %}");
+        }
+
+        const moduliSelectors = document.querySelectorAll('[id^="id_piani_formativi-"][id$="-moduli"]');
+        moduliSelectors.forEach(selector => {
+            initializeDualListBox(selector, "{% url 'search_modulo' %}");
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ========== Page Title Start ========== -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">Lista Piani Formativi</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="javascript: void(0);">Piani Formativi</a></li>
+                <li class="breadcrumb-item active">Lista Piani Formativi</li>
+            </ol>
+        </div>
+    </div>
+</div>
+<!-- ========== Page Title End ========== -->
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+             <div class="card-header border-0">
+                  <div class="row justify-content-between">
+                       <div class="col-lg-6">
+                            <div class="row align-items-center">
+                                 <div class="col-lg-6">
+                                      <form class="app-search d-none d-md-block me-auto">
+                                           <div class="position-relative">
+                                                <input type="search" class="form-control" placeholder="Cerca Piano Formativo" autocomplete="off" value="">
+                                                <iconify-icon icon="solar:magnifer-broken" class="search-widget-icon"></iconify-icon>
+                                           </div>
+                                      </form>
+                                 </div>
+                                 <div class="col-lg-4">
+                                      <h5 class="text-dark fw-medium mb-0">
+                                          {{ piani|length }} 
+                                          <span class="text-muted">Piani</span>
+                                      </h5>
+                                 </div>
+                            </div>
+                       </div>
+                       <div class="col-lg-6 text-md-end mt-3 mt-md-0">
+                            <!-- Bottone IMPOSTAZIONI -->
+                            <button type="button" class="btn btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#settingsModalPiani">
+                                <i class="ri-settings-2-line me-1"></i> Impostazioni
+                            </button>
+                            <!-- Bottone FILTRA -->
+                            <button type="button" class="btn btn-outline-primary me-1" id="toggleFiltersBtnPiani">
+                                <i class="ri-filter-line me-1"></i> Filtri
+                            </button>
+                            <!-- Link a "crea_piano" -->
+                            <a href="{% url 'crea_pianoformativo' %}" class="btn btn-success me-1">
+                                <i class="ri-add-line"></i> Nuovo Piano
+                            </a>
+                       </div>
+                  </div>
+             </div>
+        </div>
+   </div>
+</div>
+
+<div class="col-xl-12">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+            <h4 class="card-title mb-0">Lista Piani Formativi</h4>
+            <div class="dropdown">
+                <a href="#" class="dropdown-toggle btn btn-sm btn-outline-light rounded" data-bs-toggle="dropdown" aria-expanded="false">
+                    This Month
+                </a>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <a href="#!" class="dropdown-item">Download</a>
+                    <a href="#!" class="dropdown-item">Export</a>
+                    <a href="#!" class="dropdown-item">Import</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabella PIANI -->
+        <div class="table-responsive">
+            <table class="table align-middle text-nowrap table-hover table-centered mb-0" id="pianiTable">
+                <thead class="bg-light-subtle">
+                    <tr>
+                        <th class="col-select" style="width:20px;">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="checkAllPiani">
+                                <label class="form-check-label" for="checkAllPiani"></label>
+                            </div>
+                        </th>
+                        <th class="col-id">ID Piano</th>
+                        <th class="col-titolo">Titolo Piano</th>
+                        <th class="col-inizio">Data Inizio</th>
+                        <th class="col-fine">Data Fine</th>
+                        <th class="col-ore">Ore Totali</th>
+                        <th class="col-azioni">Azioni</th>
+                    </tr>
+                    <!-- RIGA FILTRI (inizialmente nascosta) -->
+                    <tr class="filters-row-piani" style="display: none;">
+                        <th></th>
+                        <th><input type="text" class="form-control filter-input-piani" data-col="col-id" placeholder="Filtra ID"></th>
+                        <th><input type="text" class="form-control filter-input-piani" data-col="col-titolo" placeholder="Filtra Titolo"></th>
+                        <th><input type="text" class="form-control filter-input-piani" data-col="col-inizio" placeholder="Filtra Data Inizio"></th>
+                        <th><input type="text" class="form-control filter-input-piani" data-col="col-fine" placeholder="Filtra Data Fine"></th>
+                        <th><input type="text" class="form-control filter-input-piani" data-col="col-ore" placeholder="Filtra Ore"></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for piano in piani %}
+                    <tr>
+                        <td class="col-select">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="checkPiano{{ forloop.counter }}">
+                                <label class="form-check-label" for="checkPiano{{ forloop.counter }}">&nbsp;</label>
+                            </div>
+                        </td>
+                        <!-- ID Piano: usa piano.id -->
+                        <td class="col-id">{{ piano.id }}</td>
+                        <!-- Titolo Piano: se nel tuo modello il campo si chiama "nome", usa piano.nome -->
+                        <td class="col-titolo">{{ piano.nome }}</td>
+                        <!-- Date e ore totali -->
+                        <td class="col-inizio">{{ piano.data_inizio|date:"d/m/Y" }}</td>
+                        <td class="col-fine">{{ piano.data_fine|date:"d/m/Y" }}</td>
+                        <td class="col-ore">{{ piano.ore_totali }}</td>
+                        <td class="col-azioni">
+                            <div class="d-flex gap-2">
+                                <!-- URL di modifica: usa piano.id -->
+                                <a href="{% url 'modifica_piano' piano.id %}"
+                                   class="btn btn-soft-primary btn-sm">
+                                    <iconify-icon icon="solar:pen-2-broken" class="align-middle fs-18"></iconify-icon>
+                                </a>
+                                <!-- URL di eliminazione: idem, se necessario -->
+                                <button onclick="confirmDeletePiano('{% url 'piano_elimina' piano.id %}')"
+                                        class="btn btn-soft-danger btn-sm">
+                                    <iconify-icon icon="solar:trash-bin-minimalistic-2-broken" class="align-middle fs-18"></iconify-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-footer">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-end mb-0">
+                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL Impostazioni PIANI -->
+<div class="modal fade" id="settingsModalPiani" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="columnSettingsFormPiani">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Impostazioni Colonne (Piani)</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          <p>Seleziona/deseleziona le colonne da mostrare:</p>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox-piani" type="checkbox" value="col-id" id="checkIdPiano" checked>
+            <label class="form-check-label" for="checkIdPiano">ID Piano</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox-piani" type="checkbox" value="col-titolo" id="checkTitolo" checked>
+            <label class="form-check-label" for="checkTitolo">Titolo Piano</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox-piani" type="checkbox" value="col-inizio" id="checkInizio" checked>
+            <label class="form-check-label" for="checkInizio">Data Inizio</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox-piani" type="checkbox" value="col-fine" id="checkFine" checked>
+            <label class="form-check-label" for="checkFine">Data Fine</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox-piani" type="checkbox" value="col-ore" id="checkOre" checked>
+            <label class="form-check-label" for="checkOre">Ore Totali</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox-piani" type="checkbox" value="col-azioni" id="checkAzioniPiani" checked>
+            <label class="form-check-label" for="checkAzioniPiani">Azioni</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+          <button type="submit" class="btn btn-primary">Applica modifiche</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Script SweetAlert2 per conferma cancellazione -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  // Conferma cancellazione
+  function confirmDeletePiano(eliminaUrl) {
+      Swal.fire({
+          title: 'Sei sicuro?',
+          text: "Vuoi eliminare questo piano?",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sì, elimina!',
+          cancelButtonText: 'Annulla'
+      }).then((result) => {
+          if (result.isConfirmed) {
+              // se confermato, reindirizzo all'URL di eliminazione
+              window.location.href = eliminaUrl;
+          }
+      });
+  }
+
+  // Bottone FILTRA Piani
+  const toggleFiltersBtnPiani = document.getElementById('toggleFiltersBtnPiani');
+  const filtersRowPiani = document.querySelector('.filters-row-piani');
+
+  toggleFiltersBtnPiani.addEventListener('click', () => {
+      if (filtersRowPiani.style.display === 'none' || filtersRowPiani.style.display === '') {
+          filtersRowPiani.style.display = 'table-row';
+      } else {
+          filtersRowPiani.style.display = 'none';
+      }
+  });
+
+  // Filtraggio per colonna
+  const filterInputsPiani = document.querySelectorAll('.filter-input-piani');
+  filterInputsPiani.forEach(input => {
+      input.addEventListener('input', () => {
+          let colClass = input.getAttribute('data-col');
+          let filterValue = input.value.toLowerCase();
+
+          const rows = document.querySelectorAll('#pianiTable tbody tr');
+          rows.forEach(row => {
+              const td = row.querySelector('.' + colClass);
+              if (!td) return;
+              let tdText = td.innerText.toLowerCase();
+              if (tdText.includes(filterValue)) {
+                  row.style.display = '';
+              } else {
+                  row.style.display = 'none';
+              }
+          });
+      });
+  });
+
+  // Impostazioni Colonne (Piani)
+  const columnCheckboxesPiani = document.querySelectorAll('.column-checkbox-piani');
+  const columnSettingsFormPiani = document.getElementById('columnSettingsFormPiani');
+
+  columnSettingsFormPiani.addEventListener('submit', function(e) {
+      e.preventDefault();
+      columnCheckboxesPiani.forEach(checkbox => {
+          const colClass = checkbox.value;
+          const checked = checkbox.checked;
+          const colElements = document.querySelectorAll('.' + colClass);
+          colElements.forEach(el => {
+              el.style.display = checked ? '' : 'none';
+          });
+      });
+
+      // Chiudi il modal
+      let myModalEl = document.getElementById('settingsModalPiani');
+      let modal = bootstrap.Modal.getInstance(myModalEl);
+      modal.hide();
+
+      // Alert
+      Swal.fire({
+          icon: 'info',
+          title: 'Tabella aggiornata',
+          text: 'La tabella Piani Formativi è stata aggiornata con le nuove impostazioni di colonna.'
+      });
+  });
+</script>
+
+{% endblock content %}

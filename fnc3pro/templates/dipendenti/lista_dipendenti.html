@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ========== Page Title Start ========== -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">Lista Dipendenti</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="javascript: void(0);">Dipendenti</a></li>
+                <li class="breadcrumb-item active">Lista Dipendenti</li>
+            </ol>
+        </div>
+    </div>
+</div>
+<!-- ========== Page Title End ========== -->
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+             <div class="card-header border-0">
+                  <div class="row justify-content-between align-items-center">
+                       <div class="col-lg-6">
+                            <form class="app-search d-none d-md-block me-auto">
+                                <div class="position-relative">
+                                    <input type="search" class="form-control" placeholder="Cerca Dipendente" autocomplete="off" value="">
+                                    <iconify-icon icon="solar:magnifer-broken" class="search-widget-icon"></iconify-icon>
+                                </div>
+                            </form>
+                       </div>
+                       <div class="col-lg-6 text-md-end mt-3 mt-md-0">
+                            <!-- Bottone "Impostazioni" che apre il Modal -->
+                            <button type="button" class="btn btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                                <i class="ri-settings-2-line me-1"></i>Impostazioni
+                            </button>
+                            
+                            <!-- Bottone "Filtri" che mostra/nasconde la riga di filtri -->
+                            <button type="button" class="btn btn-outline-primary me-1" id="toggleFiltersBtn">
+                                <i class="ri-filter-line me-1"></i> Filtri
+                            </button>
+
+                            <!-- Bottone "Nuovo Dipendente" -->
+                            <a href="{% url 'crea_dipendente' %}" class="btn btn-success me-1">
+                                <i class="ri-add-line"></i> Nuovo Dipendente
+                            </a>
+                       </div>
+                  </div>
+             </div>
+        </div>
+   </div>
+</div>
+
+<div class="col-xl-12">
+    <div class="card">
+         <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+              <h4 class="card-title mb-0">Lista Dipendenti</h4>
+         </div>
+
+         <!-- Inizio Tabella -->
+         <div class="table-responsive">
+            <table class="table align-middle text-nowrap table-hover table-centered mb-0" id="dipendentiTable">
+                <thead class="bg-light-subtle">
+                    <tr>
+                        <th class="col-cognome">Cognome</th>
+                        <th class="col-nome">Nome</th>
+                        <th class="col-datanascita">Data di Nascita</th>
+                        <th class="col-luogonascita">Luogo di Nascita</th>
+                        <th class="col-codicefiscale">Codice Fiscale</th>
+                        <th class="col-dataassunzione">Data Assunzione</th>
+                        <th class="col-mansione">Mansione</th>
+                        <th class="col-email">Email</th>
+                        <th class="col-telefono">Telefono</th>
+                        <th class="col-azioni">Azioni</th>
+                    </tr>
+                    <!-- RIGA DEI FILTRI (inizialmente nascosta via style="display: none;") -->
+                    <tr class="filters-row" style="display: none;">
+                        <th><input type="text" class="form-control filter-input" data-col="col-cognome" placeholder="Filtra cognome"></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-nome" placeholder="Filtra nome"></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-datanascita" placeholder="Filtra data nasc."></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-luogonascita" placeholder="Filtra luogo nasc."></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-codicefiscale" placeholder="Filtra CF"></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-dataassunzione" placeholder="Filtra assunz."></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-mansione" placeholder="Filtra mansione"></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-email" placeholder="Filtra email"></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-telefono" placeholder="Filtra telefono"></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dipendente in dipendenti %}
+                    <tr>
+                        <td class="col-cognome">{{ dipendente.cognome }}</td>
+                        <td class="col-nome">{{ dipendente.nome }}</td>
+                        <td class="col-datanascita">{{ dipendente.datanascita }}</td>
+                        <td class="col-luogonascita">{{ dipendente.luogonascita }} ({{ dipendente.provincianascita }})</td>
+                        <td class="col-codicefiscale">{{ dipendente.codicefiscale }}</td>
+                        <td class="col-dataassunzione">{{ dipendente.dataassunzione }}</td>
+                        <td class="col-mansione">{{ dipendente.mansione }}</td>
+                        <td class="col-email">{{ dipendente.email }}</td>
+                        <td class="col-telefono">{{ dipendente.telefono }}</td>
+                        <td class="col-azioni">
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'dipendenti_details' dipendente.id %}" class="btn btn-light btn-sm">
+                                    <iconify-icon icon="solar:eye-broken" class="align-middle fs-18"></iconify-icon>
+                                </a>
+                                <a href="{% url 'dipendenti_crud' dipendente.id %}" class="btn btn-soft-primary btn-sm">
+                                    <iconify-icon icon="solar:pen-2-broken" class="align-middle fs-18"></iconify-icon>
+                                </a>
+                                <button onclick="confirmDelete('{{ dipendente.id }}')" class="btn btn-soft-danger btn-sm">
+                                    <iconify-icon icon="solar:trash-bin-minimalistic-2-broken" class="align-middle fs-18"></iconify-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+         </div>
+         <!-- Fine Tabella -->
+
+         <div class="card-footer">
+              <nav aria-label="Page navigation example">
+                   <ul class="pagination justify-content-end mb-0">
+                        <li class="page-item"><a class="page-link" href="javascript:void(0);">Previous</a></li>
+                        <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+                        <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+                        <li class="page-item"><a class="page-link" href="javascript:void(0);">3</a></li>
+                        <li class="page-item"><a class="page-link" href="javascript:void(0);">Next</a></li>
+                   </ul>
+              </nav>
+         </div>
+    </div>
+</div>
+
+<!-- ========== MODAL Impostazioni Colonne ========== -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="columnSettingsForm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="settingsModalLabel">Impostazioni Colonne</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          <p>Seleziona/deseleziona le colonne da mostrare:</p>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-cognome" id="checkCognome" checked>
+            <label class="form-check-label" for="checkCognome">Cognome</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-nome" id="checkNome" checked>
+            <label class="form-check-label" for="checkNome">Nome</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-datanascita" id="checkDataNascita" checked>
+            <label class="form-check-label" for="checkDataNascita">Data di Nascita</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-luogonascita" id="checkLuogoNascita" checked>
+            <label class="form-check-label" for="checkLuogoNascita">Luogo di Nascita</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-codicefiscale" id="checkCodiceFiscale" checked>
+            <label class="form-check-label" for="checkCodiceFiscale">Codice Fiscale</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-dataassunzione" id="checkDataAssunzione" checked>
+            <label class="form-check-label" for="checkDataAssunzione">Data Assunzione</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-mansione" id="checkMansione" checked>
+            <label class="form-check-label" for="checkMansione">Mansione</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-email" id="checkEmail" checked>
+            <label class="form-check-label" for="checkEmail">Email</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-telefono" id="checkTelefono" checked>
+            <label class="form-check-label" for="checkTelefono">Telefono</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-azioni" id="checkAzioni" checked>
+            <label class="form-check-label" for="checkAzioni">Azioni</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+          <button type="submit" class="btn btn-primary">Applica modifiche</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- ========== FINE MODAL Impostazioni Colonne ========== -->
+
+<!-- SweetAlert2 per la conferma di cancellazione -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Funzione per la conferma di cancellazione (già esistente)
+    function confirmDelete(dipendenteId) {
+        Swal.fire({
+            title: 'Sei sicuro?',
+            text: "Vuoi eliminare questo dipendente?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sì, elimina!',
+            cancelButtonText: 'Annulla'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Chiamata AJAX per eliminare il dipendente
+                fetch(`/dipendenti/elimina/${dipendenteId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}' // Passa il CSRF token
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        Swal.fire('Errore', data.msgResponse, 'error');
+                    } else {
+                        Swal.fire('Eliminato!', data.msgResponse, 'success')
+                            .then(() => {
+                                location.reload(); // Ricarica la pagina
+                            });
+                    }
+                })
+                .catch(err => {
+                    console.error('Errore durante l\'eliminazione:', err);
+                    Swal.fire('Errore', 'Errore di rete durante l\'eliminazione.', 'error');
+                });
+            }
+        });
+    }
+
+    // -----------------------------
+    // LOGICA FILTRI E IMPOSTAZIONI
+    // -----------------------------
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1) Bottone "Filtri": mostra/nasconde la riga dei filtri
+        const toggleFiltersBtn = document.getElementById('toggleFiltersBtn');
+        const filtersRow = document.querySelector('.filters-row');
+
+        if (toggleFiltersBtn && filtersRow) {
+            toggleFiltersBtn.addEventListener('click', () => {
+                if (filtersRow.style.display === 'none' || filtersRow.style.display === '') {
+                    filtersRow.style.display = 'table-row';
+                } else {
+                    filtersRow.style.display = 'none';
+                }
+            });
+        }
+
+        // 2) Filtraggio stile "Excel/GoogleSheet": per ogni input nella riga filtri
+        const filterInputs = document.querySelectorAll('.filter-input');
+        const tableBodyRows = document.querySelectorAll('#dipendentiTable tbody tr');
+
+        filterInputs.forEach(input => {
+            input.addEventListener('input', () => {
+                const colClass = input.getAttribute('data-col');
+                const filterValue = input.value.toLowerCase();
+
+                tableBodyRows.forEach(row => {
+                    const td = row.querySelector('.' + colClass);
+                    if (!td) return;
+
+                    let tdText = td.innerText.toLowerCase();
+                    // Se il testo della cella include il valore del filtro -> ok
+                    // altrimenti nascondiamo la riga
+                    if (tdText.includes(filterValue)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // 3) Modal "Impostazioni Colonne": mostra/nasconde le colonne
+        const columnSettingsForm = document.getElementById('columnSettingsForm');
+        const columnCheckboxes = document.querySelectorAll('.column-checkbox');
+
+        if (columnSettingsForm) {
+            columnSettingsForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Per ogni checkbox, se è checked allora mostra, se no nascondi.
+                columnCheckboxes.forEach(checkbox => {
+                    const colClass = checkbox.value;
+                    const isChecked = checkbox.checked;
+
+                    // Seleziono tutti i th/td che hanno la classe corrispondente
+                    const cells = document.querySelectorAll('.' + colClass);
+                    cells.forEach(cell => {
+                        cell.style.display = isChecked ? '' : 'none';
+                    });
+                });
+
+                // Chiudi il modal (Bootstrap 5)
+                const settingsModal = document.getElementById('settingsModal');
+                const modalInstance = bootstrap.Modal.getInstance(settingsModal);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+
+                // Alert di feedback con SweetAlert2
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Impostazioni aggiornate',
+                    text: 'La tabella è stata modificata secondo le nuove impostazioni.'
+                });
+            });
+        }
+    });
+</script>
+
+{% endblock content %}

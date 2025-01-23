@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">
+                {% if progetto %}Modifica Progetto{% else %}Crea Nuovo Progetto{% endif %}
+            </h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'lista_progetti' %}">Progetti</a></li>
+                <li class="breadcrumb-item active">
+                    {% if progetto %}Modifica{% else %}Nuovo{% endif %}
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<form method="post" 
+      action="{% if progetto and progetto.id %}{% url 'modifica_progetto' progetto.id %}{% else %}{% url 'crea_progetto' %}{% endif %}">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-light-subtle">
+                    <h4 class="card-title">Dettagli Progetto</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="nome" class="form-label">Nome Progetto</label>
+                        <input type="text" id="nome" name="nome" class="form-control"
+                               value="{{ progetto.nome|default_if_none:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="data_avvio" class="form-label">Data Avvio</label>
+                        <input type="date" id="data_avvio" name="data_avvio" class="form-control"
+                               value="{{ progetto.data_avvio|date:'Y-m-d'|default_if_none:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="stato" class="form-label">Stato</label>
+                        <select id="stato" name="stato" class="form-select">
+                            <option value="In Corso" {% if progetto.stato == "In Corso" %}selected{% endif %}>In Corso</option>
+                            <option value="Concluso" {% if progetto.stato == "Concluso" %}selected{% endif %}>Concluso</option>
+                            <option value="Sospeso" {% if progetto.stato == "Sospeso" %}selected{% endif %}>Sospeso</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Altre Info Aggiuntive -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-light-subtle">
+                    <h4 class="card-title">Altre Info</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="descrizione" class="form-label">Descrizione</label>
+                        <textarea id="descrizione" name="descrizione" rows="5" class="form-control">
+                            {{ progetto.descrizione|default_if_none:'' }}
+                        </textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pulsanti di Salvataggio -->
+    <div class="row justify-content-end mt-3">
+        <div class="col-lg-2">
+            <button type="submit" class="btn btn-primary w-100" onclick="return confirmSave()">
+                Salva
+            </button>
+        </div>
+        <div class="col-lg-2">
+            <a href="{% url 'lista_progetti' %}" class="btn btn-danger w-100" onclick="return confirmCancel()">
+                Annulla
+            </a>
+        </div>
+    </div>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmSave() {
+        return Swal.fire({
+            title: 'Salvare?',
+            text: "Vuoi salvare questo progetto?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sì, salva!',
+            cancelButtonText: 'Annulla'
+        }).then((result) => {
+            return result.isConfirmed;
+        });
+    }
+
+    function confirmCancel() {
+        return Swal.fire({
+            title: 'Annullare?',
+            text: "Vuoi annullare le modifiche?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sì, annulla!',
+            cancelButtonText: 'Torna indietro'
+        }).then((result) => {
+            return result.isConfirmed;
+        });
+    }
+</script>
+
+{% endblock content %}

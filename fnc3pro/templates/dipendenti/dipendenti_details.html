@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- ========== Page Title Start ========== -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="page-title-box d-flex align-items-center justify-content-between">
+            <h4 class="mb-0 fw-semibold">Dettagli Dipendente</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'lista_dipendenti' %}">Lista Dipendenti</a></li>
+                <li class="breadcrumb-item active">Dettagli Dipendente</li>
+            </ol>
+        </div>
+    </div>
+</div>
+<!-- ========== Page Title End ========== -->
+
+<div class="row g-4">
+    <!-- Azienda di Appartenenza -->
+    <div class="col-xl-4 col-lg-5">
+        <div class="card">
+            <div class="card-header bg-light-subtle text-center">
+                <h4 class="card-title mb-0">Azienda di Appartenenza</h4>
+            </div>
+            <div class="card-body text-center">
+                <img src="/static/images/company_placeholder.jpg" alt="Logo Azienda"
+                     class="avatar-xl rounded-circle border border-2 border-light mx-auto">
+                <div class="mt-3">
+                    {% if dipendente.azienda %}
+                      <a href="{% url 'azienda_dettagli' dipendente.azienda.id %}"
+                         class="fw-medium text-dark fs-16">
+                          {{ dipendente.azienda.nome }}
+                      </a>
+                      <p class="text-muted">Partita IVA: {{ dipendente.azienda.partitaiva }}</p>
+                    {% else %}
+                      <p class="text-muted">(Nessuna azienda associata)</p>
+                    {% endif %}
+                </div>
+                <div class="mt-4">
+                    <ul class="list-inline d-flex justify-content-center gap-2">
+                        <li class="list-inline-item">
+                            <!-- Email azienda, se presente -->
+                            {% if dipendente.azienda and dipendente.azienda.email %}
+                              <a href="mailto:{{ dipendente.azienda.email }}"
+                                 class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center">
+                                  <i class="ri-mail-line fs-18"></i> Email
+                              </a>
+                            {% endif %}
+                        </li>
+                        <li class="list-inline-item">
+                            {% if dipendente.azienda %}
+                              <a href="{% url 'azienda_dipendenti' dipendente.azienda.id %}"
+                                 class="btn btn-outline-success btn-sm d-flex align-items-center justify-content-center">
+                                  <i class="ri-group-line fs-18"></i> Visualizza Dipendenti
+                              </a>
+                            {% else %}
+                              <span>(Nessuna azienda associata)</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+          </div>
+    </div>
+
+    <!-- Informazioni del Dipendente -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="card">
+            <div class="card-header bg-light-subtle">
+                <h4 class="card-title mb-0">Informazioni Generali</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Cognome:</strong> {{ dipendente.cognome }}</p>
+                        <p><strong>Nome:</strong> {{ dipendente.nome }}</p>
+                        <p><strong>Sesso:</strong> {{ dipendente.sesso }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Data di Nascita:</strong> {{ dipendente.datanascita }}</p>
+                        <p><strong>Luogo di Nascita:</strong> {{ dipendente.luogonascita }} ({{ dipendente.provincianascita }})</p>
+                        <p><strong>Codice Fiscale:</strong> {{ dipendente.codicefiscale }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header bg-light-subtle">
+                <h4 class="card-title mb-0">Contatti</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Email:</strong> <a href="mailto:{{ dipendente.email }}">{{ dipendente.email }}</a></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Telefono:</strong> <a href="tel:{{ dipendente.telefono }}">{{ dipendente.telefono }}</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dettagli Contratto -->
+        <div class="card mt-4">
+            <div class="card-header bg-light-subtle">
+                <h4 class="card-title mb-0">Dettagli Contratto</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Data Assunzione:</strong> {{ dipendente.dataassunzione }}</p>
+                        <p><strong>Data Cessazione:</strong> {{ dipendente.datacessazione|default:"N/A" }}</p>
+                        <p><strong>Tipo Contratto:</strong> {{ dipendente.tipocontratto }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Livello Contratto:</strong> {{ dipendente.livellocontratto }}</p>
+                        <p><strong>Ore Settimanali:</strong> {{ dipendente.oresettimanali }}</p>
+                        <p><strong>Percentuale Part-Time:</strong> {{ dipendente.percparttime }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mansione e Qualifica -->
+        <div class="card mt-4">
+            <div class="card-header bg-light-subtle">
+                <h4 class="card-title mb-0">Mansione e Qualifica</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Qualifica:</strong> {{ dipendente.qualifica }}</p>
+                <p><strong>Mansione:</strong> {{ dipendente.mansione }}</p>
+            </div>
+        </div>
+
+        <!-- Note Dipendente -->
+        <div class="card mt-4">
+            <div class="card-header bg-light-subtle">
+                <h4 class="card-title mb-0">Note</h4>
+            </div>
+            <div class="card-body">
+                <p>{{ dipendente.note }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="mapouter">
+            <div class="gmap_canvas mb-2">
+                <iframe 
+                    class="gmap_iframe rounded" 
+                    width="100%" 
+                    style="height: 400px;" 
+                    frameborder="0" 
+                    scrolling="no" 
+                    marginheight="0" 
+                    marginwidth="0" 
+                    src="https://maps.google.com/maps?width=1980&amp;height=400&amp;hl=en&amp;q={{ dipendente.luogonascita|urlencode }}&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed">
+                </iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

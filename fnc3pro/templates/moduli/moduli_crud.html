@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">
+                {% if modulo %}Modifica Modulo{% else %}Crea Nuovo Modulo{% endif %}
+            </h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'lista_moduli' %}">Moduli</a>
+                </li>
+                <li class="breadcrumb-item active">
+                    {% if modulo %}Modifica{% else %}Nuovo{% endif %}
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<form method="post" action="">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-light-subtle">
+                    <h4 class="card-title">
+                        {% if modulo %}Modifica{% else %}Nuovo{% endif %} Modulo
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Nome -->
+                    <div class="mb-3">
+                        <label for="nome" class="form-label">Nome Modulo</label>
+                        <input type="text" id="nome" name="nome" class="form-control" required
+                               value="{% if modulo %}{{ modulo.nome }}{% endif %}">
+                    </div>
+
+                    <!-- Descrizione -->
+                    <div class="mb-3">
+                        <label for="descrizione" class="form-label">Descrizione</label>
+                        <textarea id="descrizione" name="descrizione" rows="3" class="form-control"
+                        >{% if modulo %}{{ modulo.descrizione }}{% endif %}</textarea>
+                    </div>
+
+                    <!-- CampoNote1 -->
+                    <div class="mb-3">
+                        <label for="camponote1" class="form-label">Note Aggiuntive 1</label>
+                        <textarea id="camponote1" name="camponote1" rows="2" class="form-control"
+                        >{% if modulo %}{{ modulo.camponote1 }}{% endif %}</textarea>
+                    </div>
+
+                    <!-- CampoNote2 -->
+                    <div class="mb-3">
+                        <label for="camponote2" class="form-label">Note Aggiuntive 2</label>
+                        <textarea id="camponote2" name="camponote2" rows="2" class="form-control"
+                        >{% if modulo %}{{ modulo.camponote2 }}{% endif %}</textarea>
+                    </div>
+
+                    <!-- CampoNote3 -->
+                    <div class="mb-3">
+                        <label for="camponote3" class="form-label">Note Aggiuntive 3</label>
+                        <textarea id="camponote3" name="camponote3" rows="2" class="form-control"
+                        >{% if modulo %}{{ modulo.camponote3 }}{% endif %}</textarea>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pulsanti di Salvataggio -->
+    <div class="row justify-content-end mt-3">
+        <div class="col-lg-2">
+            <button type="submit" class="btn btn-primary w-100" onclick="return confirmSaveModulo()">
+                Salva
+            </button>
+        </div>
+        <div class="col-lg-2">
+            <a href="{% url 'lista_moduli' %}" class="btn btn-danger w-100" onclick="return confirmCancelModulo()">
+                Annulla
+            </a>
+        </div>
+    </div>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmSaveModulo() {
+        return Swal.fire({
+            title: 'Salvare?',
+            text: "Vuoi salvare questo modulo?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sì, salva!',
+            cancelButtonText: 'Annulla'
+        }).then((result) => {
+            // Se l'utente conferma, result.isConfirmed = true
+            return result.isConfirmed;
+        });
+    }
+
+    function confirmCancelModulo() {
+        return Swal.fire({
+            title: 'Annullare?',
+            text: "Vuoi annullare le modifiche al modulo?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sì, annulla!',
+            cancelButtonText: 'Torna indietro'
+        }).then((result) => {
+            return result.isConfirmed;
+        });
+    }
+</script>
+
+{% endblock content %}

@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">{% if dipendente %}Modifica Dettagli Dipendente{% else %}Inserisci Nuovo Dipendente{% endif %}</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'lista_dipendenti' %}">Lista Dipendenti</a></li>
+                <li class="breadcrumb-item active">{% if dipendente %}Modifica Dipendente{% else %}Nuovo Dipendente{% endif %}</li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<form method="post" action="{% if dipendente %}{% url 'dipendenti_crud' dipendente.id %}{% else %}{% url 'crea_dipendente' %}{% endif %}">
+    {% csrf_token %}
+    <div class="row">
+        <!-- Sezione Informazioni Personali -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-light-subtle">
+                    <h4 class="card-title">Informazioni Personali</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="cognome" class="form-label">Cognome</label>
+                        <input type="text" id="cognome" name="cognome" class="form-control" value="{{ dipendente.cognome|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="nome" class="form-label">Nome</label>
+                        <input type="text" id="nome" name="nome" class="form-control" value="{{ dipendente.nome|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="sesso" class="form-label">Sesso</label>
+                        <input type="text" id="sesso" name="sesso" class="form-control" value="{{ dipendente.sesso|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="datanascita" class="form-label">Data di Nascita</label>
+                        <input type="date" id="datanascita" name="datanascita" class="form-control" value="{{ dipendente.datanascita|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="luogonascita" class="form-label">Luogo di Nascita</label>
+                        <input type="text" id="luogonascita" name="luogonascita" class="form-control" value="{{ dipendente.luogonascita|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="provincianascita" class="form-label">Provincia di Nascita</label>
+                        <input type="text" id="provincianascita" name="provincianascita" class="form-control" value="{{ dipendente.provincianascita|default:'' }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sezione Contratto e Mansione -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-light-subtle">
+                    <h4 class="card-title">Contratto e Mansione</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="idazienda" class="form-label">Azienda</label>
+                        <select id="idazienda" name="idazienda" class="form-select" required>
+                            <option value="" selected>Seleziona un'azienda</option>
+                            {% for azienda in aziende %}
+                                <option value="{{ azienda.id }}" {% if dipendente and dipendente.azienda and dipendente.azienda.id == azienda.id %}selected{% endif %}>
+                                    {{ azienda.nome }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tipocontratto" class="form-label">Tipo Contratto</label>
+                        <input type="text" id="tipocontratto" name="tipocontratto" class="form-control" value="{{ dipendente.tipocontratto|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="livellocontratto" class="form-label">Livello Contratto</label>
+                        <input type="text" id="livellocontratto" name="livellocontratto" class="form-control" value="{{ dipendente.livellocontratto|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="oresettimanali" class="form-label">Ore Settimanali</label>
+                        <input type="text" id="oresettimanali" name="oresettimanali" class="form-control" value="{{ dipendente.oresettimanali|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="percparttime" class="form-label">Percentuale Part-Time</label>
+                        <input type="text" id="percparttime" name="percparttime" class="form-control" value="{{ dipendente.percparttime|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="qualifica" class="form-label">Qualifica</label>
+                        <input type="text" id="qualifica" name="qualifica" class="form-control" value="{{ dipendente.qualifica|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="mansione" class="form-label">Mansione</label>
+                        <input type="text" id="mansione" name="mansione" class="form-control" value="{{ dipendente.mansione|default:'' }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-light-subtle">
+                    <h4 class="card-title">Contatti e Note</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" value="{{ dipendente.email|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label">Telefono</label>
+                        <input type="text" id="telefono" name="telefono" class="form-control" value="{{ dipendente.telefono|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="note" class="form-label">Note</label>
+                        <textarea id="note" name="note" class="form-control" rows="4">{{ dipendente.note|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pulsanti di Salvataggio -->
+    <div class="row justify-content-end mt-3">
+        <div class="col-lg-2">
+            <button type="submit" class="btn btn-primary w-100" onclick="return confirmSave()">Salva</button>
+        </div>
+        <div class="col-lg-2">
+            <a href="{% url 'lista_dipendenti' %}" class="btn btn-danger w-100" onclick="return confirmCancel()">Annulla</a>
+        </div>
+    </div>
+</form>
+
+<script>
+    function confirmSave() {
+        return Swal.fire({
+            title: 'Sei sicuro?',
+            text: "Vuoi salvare le modifiche a questo dipendente?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sì, salva!',
+            cancelButtonText: 'Annulla'
+        }).then((result) => {
+            return result.isConfirmed;
+        });
+    }
+
+    function confirmCancel() {
+        return Swal.fire({
+            title: 'Sei sicuro?',
+            text: "Vuoi annullare le modifiche?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sì, annulla!',
+            cancelButtonText: 'Torna indietro'
+        }).then((result) => {
+            return result.isConfirmed;
+        });
+    }
+</script>
+{% endblock content %}

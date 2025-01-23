@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- ========== Page Title Start ========== -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="page-title-box d-flex align-items-center justify-content-between">
+            <h4 class="mb-0 fw-semibold">Associazione Progetti &gt; Piani Formativi</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'lista_progetti' %}">Wizard</a>
+                </li>
+                <li class="breadcrumb-item active">Progetti &gt; Piani Formativi</li>
+            </ol>
+        </div>
+    </div>
+</div>
+<!-- ========== Page Title End ========== -->
+
+
+<form method="post" action="">
+    {% csrf_token %}
+    <div class="card mb-2">
+        <div class="card-header">
+            <h5 class="card-title anchor" id="basic-wizard">Wizard ProForm<a class="anchor-link" href="#horizontal-wizard">#</a></h5>
+        </div>
+        <div class="card-body">
+    <div id="progettiPianiWizard">
+        <!-- Nav Pills -->
+        <ul class="nav nav-pills nav-justified icon-wizard form-wizard-header bg-light p-1" role="tablist">
+            <!-- Step 1 -->
+            <li class="nav-item" role="presentation">
+                <a href="#wizardStep1" data-bs-toggle="tab" class="nav-link rounded-0 py-2 active" role="tab">
+                    <iconify-icon icon="ri-folder-open-line" class="fs-26"></iconify-icon>
+                    Seleziona Progetto
+                </a>
+            </li>
+            <!-- Step 2 -->
+            <li class="nav-item" role="presentation">
+                <a href="#wizardStep2" data-bs-toggle="tab" class="nav-link rounded-0 py-2" role="tab">
+                    <iconify-icon icon="ri-file-list-3-line" class="fs-26"></iconify-icon>
+                    Scegli Piani Formativi
+                </a>
+            </li>
+            <!-- Step 3 -->
+            <li class="nav-item" role="presentation">
+                <a href="#wizardStep3" data-bs-toggle="tab" class="nav-link rounded-0 py-2" role="tab">
+                    <iconify-icon icon="ri-check-line" class="fs-26"></iconify-icon>
+                    Conferma
+                </a>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content mb-0">
+            <!-- STEP 1: Seleziona Progetto -->
+            <div class="tab-pane active show" id="wizardStep1" role="tabpanel">
+                <h4 class="fs-16 fw-semibold mb-1">Seleziona il Progetto</h4>
+                <p class="text-muted">Scegli un progetto dall'elenco.</p>
+
+                <div class="mb-3">
+                    <label for="selectProgetto" class="form-label">Progetto</label>
+                    <!-- select con i progetti mock -->
+                    <select id="selectProgetto" name="selectProgetto" class="form-select">
+                        <option value="">-- Seleziona Progetto --</option>
+                        {% for progetto in progetti %}
+                            <option value="{{ progetto.id_progetto }}">
+                                {{ progetto.nome }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- STEP 2: Seleziona Piani Formativi -->
+            <div class="tab-pane" id="wizardStep2" role="tabpanel">
+                <h4 class="fs-16 fw-semibold mb-1">Scegli i Piani Formativi</h4>
+                <p class="text-muted">Seleziona uno o più piani formativi da associare al progetto.</p>
+
+                <div class="row">
+                    <!-- Esempio: elenco di piani con checkbox -->
+                    {% for piano in piani %}
+                        <div class="col-lg-4">
+                            <div class="form-check mb-2">
+                                <input 
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    id="piano_{{ piano.id_piano }}"
+                                    name="pianiSelezionati"
+                                    value="{{ piano.id_piano }}"
+                                >
+                                <label class="form-check-label" for="piano_{{ piano.id_piano }}">
+                                    {{ piano.titolo }}
+                                </label>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- STEP 3: Conferma -->
+            <div class="tab-pane" id="wizardStep3" role="tabpanel">
+                <h4 class="fs-16 fw-semibold mb-1">Conferma Associazione</h4>
+                <p class="text-muted">Verifica i dati e conferma l'associazione.</p>
+
+                <!-- Recap delle scelte utente -->
+                <div class="alert alert-info" id="recapScelte">
+                    <strong>Progetto selezionato:</strong>
+                    <span id="recapProgetto"></span><br>
+                    <strong>Piani formativi selezionati:</strong>
+                    <span id="recapPiani"></span>
+                </div>
+            </div>
+
+            <!-- Pulsanti Wizard -->
+            <div class="d-flex flex-wrap align-items-center wizard justify-content-between gap-3 mt-3">
+                <div class="first">
+                    <button type="button" class="btn btn-soft-primary" data-wizard="first">
+                        Primo Step
+                    </button>
+                </div>
+                <div class="d-flex gap-2">
+                    <div class="previous">
+                        <button type="button" class="btn btn-primary" data-wizard="previous">
+                            <i class="bx bx-left-arrow-alt me-2"></i> Indietro
+                        </button>
+                    </div>
+                    <div class="next">
+                        <button type="button" class="btn btn-primary" data-wizard="next">
+                            Avanti <i class="ri-arrow-right-line ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="last d-none">
+                    <button type="submit" class="btn btn-soft-primary" data-wizard="finish">
+                        Conferma
+                    </button>
+                </div>
+            </div>
+        </div> <!-- end tab-content -->
+    </div> <!-- end #progettiPianiWizard-->
+    </div> <!-- end #progettiPianiWizard-->
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inizializza il wizard associato al contenitore #progettiPianiWizard
+        const wizard = new bootstrap.Tab(document.querySelector('#progettiPianiWizard .nav-link.active'));
+
+        // Al cambio di step
+        document.querySelectorAll('#progettiPianiWizard .nav-link').forEach((tab, index) => {
+            tab.addEventListener('shown.bs.tab', function (e) {
+                if (index === 2) {
+                    const selectProgettoEl = document.getElementById('selectProgetto');
+                    const progettoName = selectProgettoEl.options[selectProgettoEl.selectedIndex]?.text || 'Nessun progetto selezionato';
+
+                    const checkboxes = document.querySelectorAll('input[name="pianiSelezionati"]:checked');
+                    let pianiNames = [];
+                    checkboxes.forEach(ch => {
+                        let label = document.querySelector(`label[for="${ch.id}"]`);
+                        pianiNames.push(label ? label.innerText : ch.value);
+                    });
+                    if (pianiNames.length === 0) {
+                        pianiNames.push('Nessun piano selezionato');
+                    }
+
+                    document.getElementById('recapProgetto').innerText = progettoName;
+                    document.getElementById('recapPiani').innerText = pianiNames.join(', ');
+
+                    // Show the confirm button
+                    document.querySelector('.last').classList.remove('d-none');
+                } else {
+                    // Hide the confirm button
+                    document.querySelector('.last').classList.add('d-none');
+                }
+            });
+        });
+
+        // Event listeners for wizard buttons
+        document.querySelector('[data-wizard="previous"]').addEventListener('click', function() {
+            const activeTab = document.querySelector('#progettiPianiWizard .nav-link.active');
+            const previousTab = activeTab.parentElement.previousElementSibling?.querySelector('.nav-link');
+            if (previousTab) {
+                bootstrap.Tab.getInstance(previousTab).show();
+            }
+        });
+        document.querySelector('[data-wizard="next"]').addEventListener('click', function() {
+            const activeTab = document.querySelector('#progettiPianiWizard .nav-link.active');
+            const nextTab = activeTab.parentElement.nextElementSibling?.querySelector('.nav-link');
+            if (nextTab) {
+                bootstrap.Tab.getInstance(nextTab).show();
+            }
+        });
+        document.querySelector('[data-wizard="first"]').addEventListener('click', function() {
+            const firstTab = document.querySelector('#progettiPianiWizard .nav-link:first-child');
+            if (firstTab) {
+                bootstrap.Tab.getInstance(firstTab).show();
+            }
+        });
+        document.querySelector('[data-wizard="finish"]').addEventListener('click', function() {
+            document.querySelector('form').submit();
+        });
+
+        // Intercetta l'evento "submit" del form
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // blocco il submit (se vuoi gestire i dati con AJAX)
+
+            // Esempio: potresti inviare i dati con fetch/AJAX
+            // fetch('', { method: 'POST', body: new FormData(form) })
+            //     .then(r => r.text()) ...
+
+            // Oppure effettuo direttamente un redirect a /progetti/
+            window.location.href = "{% url 'lista_progetti' %}";
+        });
+    });
+</script>
+
+{% endblock content %}

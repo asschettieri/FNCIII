@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- ========== Page Title Start ========== -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">Dettagli Azienda</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'lista_aziende' %}">Lista Aziende</a></li>
+                <li class="breadcrumb-item active">Dettagli Azienda</li>
+            </ol>
+        </div>
+    </div>
+</div>
+<!-- ========== Page Title End ========== -->
+
+<div class="row">
+    <div class="col-lg-4">
+        <!-- Informazioni generali dell'azienda -->
+        <div class="card">
+            <div class="card-header bg-light-subtle">
+                <h4 class="card-title">Informazioni Generali</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Nome Azienda:</strong> {{ azienda.azienda }}</p>
+                <p><strong>Partita IVA:</strong> {{ azienda.partitaiva }}</p>
+                <p><strong>Codice Fiscale:</strong> {{ azienda.cfazienda }}</p>
+                <p><strong>Codice Ateco:</strong> {{ azienda.codiceateco }}</p>
+                <p><strong>Forma Giuridica:</strong> {{ azienda.formagiuridica }}</p>
+            </div>
+        </div>
+
+        <!-- Contatti azienda -->
+        <div class="card">
+            <div class="card-header bg-light-subtle">
+                <h4 class="card-title">Contatti</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Telefono:</strong> {{ azienda.telefono }}</p>
+                <p><strong>Cellulare:</strong> {{ azienda.cellulare }}</p>
+                <p><strong>Email:</strong> {{ azienda.email }}</p>
+                <p><strong>PEC:</strong> {{ azienda.pec }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <!-- Sedi aziendali -->
+        <div class="card">
+            <div class="card-header bg-light-subtle">
+                <h4 class="card-title">Sedi Aziendali</h4>
+            </div>
+            <div class="card-body">
+                <h5>Sede Legale:</h5>
+                <p>{{ azienda.indirizzosl }}, {{ azienda.cittasl }} ({{ azienda.provinciasl }}), {{ azienda.capsl }}</p>
+
+                <h5>Sede Operativa:</h5>
+                <p>{{ azienda.indirizzoso }}, {{ azienda.cittaso }} ({{ azienda.provinciaso }}), {{ azienda.capso }}</p>
+
+                <h5>Luogo Rappresentante:</h5>
+                <p>{{ azienda.indirizzolr }}, {{ azienda.cittalr }} ({{ azienda.provincialr }}), {{ azienda.caplr }}</p>
+            </div>
+        </div>
+
+        <!-- Rappresentante Legale -->
+        <div class="card">
+            <div class="card-header bg-light-subtle">
+                <h4 class="card-title">Rappresentante Legale</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Nome:</strong> {{ azienda.rappresentante }}</p>
+                <p><strong>Codice Fiscale:</strong> {{ azienda.cfrappresentante }}</p>
+                <p><strong>Luogo di Nascita:</strong> {{ azienda.luogonascitalr }} ({{ azienda.provincianascitalr }})</p>
+                <p><strong>Data di Nascita:</strong> {{ azienda.datanascitalr }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <!-- Note aziendali -->
+        <div class="card">
+            <div class="card-header bg-light-subtle">
+                <h4 class="card-title">Note Aziendali</h4>
+            </div>
+            <div class="card-body">
+                <p>{{ azienda.note }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+         <div class="mapouter">
+              <div class="gmap_canvas mb-2">
+                   <iframe 
+                       class="gmap_iframe rounded" 
+                       width="100%" 
+                       style="height: 400px;" 
+                       frameborder="0" 
+                       scrolling="no" 
+                       marginheight="0" 
+                       marginwidth="0" 
+                       src="https://maps.google.com/maps?width=1980&amp;height=400&amp;hl=en&amp;q={{ azienda.indirizzosl|urlencode }}&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed">
+                   </iframe>
+              </div>
+         </div>
+    </div>
+</div>
+
+{% endblock content %}
