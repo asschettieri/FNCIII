@@ -58,6 +58,11 @@ urlpatterns = [
     path('moduli/modifica/<int:id_modulo>/', views.modulo_crud, name='modifica_modulo'),
     path('moduli/elimina/<int:id_modulo>/', views.modulo_elimina, name='modulo_elimina'),
     
+    path('fondo/', views.TipoFondoListView.as_view(), name='tipofondo_list'),
+    path('fondo/create/', views.TipoFondoCreateView.as_view(), name='tipofondo_create'),
+    path('fondo/<int:pk>/update/', views.TipoFondoUpdateView.as_view(), name='tipofondo_update'),
+    path('fondo/<int:pk>/delete/', views.TipoFondoDeleteView.as_view(), name='tipofondo_delete'),
+    path('fondo/search/', views.search_tipofondo, name='tipofondo_search'),
 
     path('search_azienda',views.search_azienda, name="search_azienda"),
     path('search_modulo',views.search_modulo, name="search_modulo"),

@@ -35,3 +35,13 @@ PianoFormativoInlineFormSet = inlineformset_factory(
     extra=1,
     can_delete=True
 )
+
+class TipoFondoForm(forms.ModelForm):
+    class Meta:
+        model = TipoFondo
+        fields = ['nome', 'percentuale_dad', 'percentuale_fad']
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Inserisci il nome'}),
+            'percentuale_dad': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Inserisci la percentuale DAD'}),
+            'percentuale_fad': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Inserisci la percentuale FAD'}),
+        }
