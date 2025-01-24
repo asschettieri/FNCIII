@@ -1269,3 +1269,63 @@ def search_tipofondo(request):
         'pagination': {'more': end < total}
     })
 
+
+# =======================
+#    autenticazione
+# =======================
+
+
+
+def login_view(request):
+    """
+    View per gestire il login degli utenti.
+    """
+    if request.method == 'POST':
+        form = CustomAuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f"Benvenuto, {username}!")
+                return redirect('index')  # Reindirizza alla homepage
+            else:
+                messages.error(request, "Credenziali non valide.")
+        else:
+            messages.error(request, "Errore nel form. Correggi i campi evidenziati.")
+    else:
+        form = CustomAuthenticationForm()
+
+    return render(request, 'accounts/auth_login.html', {'form': form})
+
+@login_required
+def logout_view(request):
+    """
+    View per eseguire il logout.
+    """
+    django_logout(request)
+    messages.success(request, "Sei uscito dall'account.")
+    return redirect('psbsrl_login')
+
+
+def register_view(request):
+    """
+    View per la registrazione di nuovi utenti 
+    usando il dominio psbsrl nell'email.
+    """
+    if request.method == 'POST':
+        form = PsbsrlRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()   # Salva l'utente
+            # Imposta il backend per il login
+            user.backend = 'django.contrib.auth.backends.ModelBackend'  # Sostituisci con il tuo backend se diverso
+            login(request, user)  # Esegui il login
+            messages.success(request, "Registrazione completata con successo! Benvenuto!")
+            return redirect('index')  # o altra pagina dopo registrazione
+        else:
+            messages.error(request, "Errore nella registrazione. Correggi i campi indicati.")
+    else:
+        form = PsbsrlRegistrationForm()
+
+    return render(request, 'accounts/auth_register.html', {'form': form})
