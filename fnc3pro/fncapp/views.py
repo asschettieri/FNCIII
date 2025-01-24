@@ -4,7 +4,6 @@ import http.client
 import json
 import os, io, logging
 import openpyxl
-import pyexcel_ods3 as ods
 import uuid
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -13,7 +12,9 @@ from django.contrib import messages
 from fncapp.form import *
 from django.urls import reverse_lazy, reverse
 from django.db import transaction
-from django.views.generic import CreateView, UpdateView
+from django.views.generic import CreateView, UpdateView, DeleteView, View
+from utility.datatable import *
+from django.contrib.auth.mixins import PermissionRequiredMixin
 # Import dei tuoi model
 from .models import *
 from .form import *
@@ -1103,7 +1104,6 @@ def search_modulo(request):
         'pagination': {'more': end < total}
     })
     
-    
 # =======================
 #    TIMESHEET
 # =======================
@@ -1186,65 +1186,86 @@ def salva_tutti_timesheets(request):
             return JsonResponse({"success": False, "message": f"Errore durante l'aggiornamento: {str(e)}"})
     return JsonResponse({"success": False, "message": "Metodo non consentito."})
 
+def get_tipofondo_table(request):
+    queryset = TipoFondo.objects.all().order_by('nome')
 
+    fields = ['nome', 'percentuale_dad', 'percentuale_fad']
+    manual_name_and_verbose = {
+        'nome': ('nome', 'Nome'),
+        'percentuale_dad': ('percentuale_dad', 'Percentuale DAD (%)'),
+        'percentuale_fad': ('percentuale_fad', 'Percentuale FAD (%)'),
+    }
 
+    additional_fields = ['id']
+    table_filter = 'global'
+    paginate = sortable = True
 
-# =======================
-#    autenticazione
-# =======================
+    table = Table(
+        request=request,
+        queryset=queryset,
+        fields=fields,
+        additional_fields=additional_fields,
+        manual_name_and_verbose=manual_name_and_verbose,
+        table_filter=table_filter,
+        sortable=sortable,
+        paginate=paginate
+    )
 
+    return table
 
+class TipoFondoListView(View):
+    raise_exception = True
 
-def login_view(request):
-    """
-    View per gestire il login degli utenti.
-    """
-    if request.method == 'POST':
-        form = CustomAuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                messages.success(request, f"Benvenuto, {username}!")
-                return redirect('index')  # Reindirizza alla homepage
-            else:
-                messages.error(request, "Credenziali non valide.")
-        else:
-            messages.error(request, "Errore nel form. Correggi i campi evidenziati.")
-    else:
-        form = CustomAuthenticationForm()
+    def get(self, request, *args, **kwargs):
+        context = {}
+        template = 'tipofondo/tipofondo_list.html'
 
-    return render(request, 'accounts/auth_login.html', {'form': form})
+        table = get_tipofondo_table(request)
 
-@login_required
-def logout_view(request):
-    """
-    View per eseguire il logout.
-    """
-    django_logout(request)
-    messages.success(request, "Sei uscito dall'account.")
-    return redirect('psbsrl_login')
+        if 'type' in request.GET and request.GET['type'] == 'view':
+            return table.execute()
 
+        context['table'] = [table.datatable_data_keys, table.table_columns_headers]
+        context['field_header'] = zip(table.datatable_data_keys, table.table_columns_headers)
 
-def register_view(request):
-    """
-    View per la registrazione di nuovi utenti 
-    usando il dominio psbsrl nell'email.
-    """
-    if request.method == 'POST':
-        form = PsbsrlRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()   # Salva l'utente
-            # Imposta il backend per il login
-            user.backend = 'django.contrib.auth.backends.ModelBackend'  # Sostituisci con il tuo backend se diverso
-            login(request, user)  # Esegui il login
-            messages.success(request, "Registrazione completata con successo! Benvenuto!")
-            return redirect('index')  # o altra pagina dopo registrazione
-        else:
-            messages.error(request, "Errore nella registrazione. Correggi i campi indicati.")
-    else:
-        form = PsbsrlRegistrationForm()
+        return render(request, template, context)
 
-    return render(request, 'accounts/auth_register.html', {'form': form})
+class TipoFondoCreateView(CreateView):
+    model = TipoFondo
+    form_class = TipoFondoForm
+    template_name = 'tipofondo/tipofondo_create_form.html'
+    success_url = reverse_lazy('core:tipofondo_list')
+    raise_exception = True
+
+class TipoFondoUpdateView(UpdateView):
+    model = TipoFondo
+    form_class = TipoFondoForm
+    template_name = 'tipofondo/tipofondo_edit_form.html'
+    success_url = reverse_lazy('core:tipofondo_list')
+    raise_exception = True
+
+class TipoFondoDeleteView(DeleteView):
+    model = TipoFondo
+    template_name = 'tipofondo/tipofondo_confirm_delete.html'
+    success_url = reverse_lazy('core:tipofondo_list')
+    raise_exception = True
+
+def search_tipofondo(request):
+    search_term = request.GET.get('term', '')
+    page = request.GET.get('page', 1)
+    page_size = 10
+
+    queryset = TipoFondo.objects.filter(nome__icontains=search_term).order_by('nome')
+    total = queryset.count()
+    start = (int(page) - 1) * page_size
+    end = start + page_size
+
+    results = [
+        {'id': elem.pk, 'text': elem.nome} for elem in queryset[start:end]
+    ]
+
+    return JsonResponse({
+        'results': results,
+        'pagination': {'more': end < total}
+    })
+
