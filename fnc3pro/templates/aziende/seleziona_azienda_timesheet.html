@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid p-4">
+    <h1 class="text-center text-dark mb-5">Seleziona Azienda per Visualizzare il Timesheet</h1>
+
+    <div class="wizard-step bg-light border rounded p-4 shadow-sm mb-4">
+        <h2 class="mb-3">Seleziona Azienda</h2>
+
+        <!-- Campo di ricerca per filtrare le aziende -->
+        <div class="form-group mb-3">
+            <label for="search_azienda" class="form-label text-dark">Cerca Azienda</label>
+            <input type="text" id="search_azienda" class="form-control" placeholder="Digita per cercare..." onkeyup="filterAziende()" />
+        </div>
+
+        <!-- Menu a tendina per le aziende -->
+        <div class="form-group mb-3">
+            <label for="azienda_id" class="form-label text-dark">Azienda</label>
+            <select class="form-select" id="azienda_id" name="azienda_id">
+                <option value="">-- Seleziona --</option>
+                {% for az in aziende %}
+                <option value="{{ az.id }}" data-email="{{ az.email }}" data-telefono="{{ az.telefono }}">
+                    {{ az.nome }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Bottone per confermare la selezione -->
+        <button class="btn btn-primary mt-3 w-100" id="next_button" disabled onclick="redirectToTimesheet()">Continua</button>
+    </div>
+</div>
+
+<script>
+    // Funzione per filtrare le aziende
+    function filterAziende() {
+        const searchInput = document.getElementById("search_azienda").value.toLowerCase();
+        const aziendaSelect = document.getElementById("azienda_id");
+        const aziendaOptions = aziendaSelect.options;
+
+        let hasResults = false;
+
+        for (let i = 0; i < aziendaOptions.length; i++) {
+            const option = aziendaOptions[i];
+            if (option.text.toLowerCase().includes(searchInput)) {
+                option.style.display = "";
+                hasResults = true;
+            } else {
+                option.style.display = "none";
+            }
+        }
+
+        aziendaSelect.size = hasResults ? Math.min(aziendaOptions.length, 5) : 1;
+    }
+
+    // Funzione per abilitare/disabilitare il pulsante di avanzamento
+    document.getElementById("azienda_id").addEventListener("change", function () {
+        const nextButton = document.getElementById("next_button");
+        nextButton.disabled = !this.value; // Abilita solo se è selezionata un'azienda
+    });
+
+    // Funzione per eseguire il redirect alla vista timesheet
+    function redirectToTimesheet() {
+        const aziendaId = document.getElementById("azienda_id").value;
+        if (aziendaId) {
+            window.location.href = `/aziende/${aziendaId}/timesheets/`;
+        } else {
+            alert("Per favore, seleziona un'azienda prima di procedere.");
+        }
+    }
+</script>
+{% endblock %}

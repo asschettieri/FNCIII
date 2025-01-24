@@ -85,13 +85,11 @@
          <div class="card bg-body shadow-none">
               <div class="card-header border-0">
                    <div class="row justify-content-between align-items-center">
-                        <div class="col-lg-6">
-                             <p class="mb-0 text-muted">Showing all <span class="text-dark fw-semibold">311</span> Agent</p>
-                        </div>
+                    <div class="col-lg-6">
+                        <p class="mb-0 text-muted">Mostrando un totale di <span class="text-dark fw-semibold">{{ totale_dipendenti }}</span> dipendenti</p>
+                    </div>
                         <div class="col-lg-6">
                              <div class="text-md-end mt-3 mt-md-0">
-                                  <button type="button" class="btn btn-outline-primary me-1"><i class="ri-settings-2-line me-1"></i>More Setting</button>
-                                  <button type="button" class="btn btn-outline-primary me-1"><i class="ri-filter-line me-1"></i> Filters</button>
                                   <a href="{% url 'crea_dipendente' %}" class="btn btn-success me-1">
                                     <i class="ri-add-line"></i> Inserisci Dipendente
                                 </a>
@@ -116,10 +114,10 @@
                                          alt="Foto Dipendente" 
                                          class="avatar-lg rounded-circle border border-light">
                                     <div class="ms-3">
-                                        <a href="{% url 'dipendenti_details' dipendente.dipendente_id %}" 
-                                           class="text-dark fw-medium fs-16">
-                                            {{ dipendente.nome }} {{ dipendente.cognome }}
-                                        </a>
+                                        <a href="{% url 'dipendenti_details' dipendente.id %}" 
+                                        class="text-dark fw-medium fs-16">
+                                         {{ dipendente.nome }} {{ dipendente.cognome }}
+                                     </a>
                                         <p class="text-muted mb-0">Email: {{ dipendente.email }}</p>
                                         <p class="text-muted mb-0">Telefono: {{ dipendente.telefono }}</p>
                                     </div>
