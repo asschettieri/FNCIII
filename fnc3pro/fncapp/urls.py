@@ -61,5 +61,11 @@ urlpatterns = [
 
     path('search_azienda',views.search_azienda, name="search_azienda"),
     path('search_modulo',views.search_modulo, name="search_modulo"),
+    
+    
+    path('login/', views.login_view, name='psbsrl_login'),
+    path('logout/', views.logout_view, name='psbsrl_logout'),
+    path('register/', views.register_view, name='psbsrl_register'),
+
 
 ]

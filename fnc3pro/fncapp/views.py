@@ -14,20 +14,25 @@ from fncapp.form import *
 from django.urls import reverse_lazy, reverse
 from django.db import transaction
 from django.views.generic import CreateView, UpdateView
-
 # Import dei tuoi model
 from .models import *
+from .form import *
 from .services_openapi import connection_openapi, normalize_ateco
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login, logout as django_logout
+from django.contrib.auth.decorators import login_required
 
 # =======================
 #    INDEX
 # =======================
+@login_required
 def index(request):
     return render(request, 'index.html')
 
 # =======================
 #    AZIENDE
 # =======================
+@login_required
 def lista_aziende(request):
     # Conta il totale delle aziende
     aziende = Azienda.objects.all()
@@ -35,6 +40,7 @@ def lista_aziende(request):
     return render(request, 'aziende/lista_aziende.html', {'aziende': aziende, 'totale_aziende': totale_aziende})
 
 logger = logging.getLogger(__name__)
+@login_required
 def aziende_details(request, id_azienda):
     azienda = get_object_or_404(Azienda, pk=id_azienda)
     
@@ -68,7 +74,7 @@ def aziende_details(request, id_azienda):
     }
     return render(request, 'aziende/aziende_details.html', context)
 
-
+@login_required
 def azienda_crud(request, id_azienda=None):
     """
     Creazione o modifica di un'azienda.
@@ -140,7 +146,7 @@ def azienda_crud(request, id_azienda=None):
         'azienda': azienda,
         'codici_ateco': codici_ateco,
     })
-    
+@login_required
 def azienda_dipendenti(request, id_azienda):
     azienda = get_object_or_404(Azienda, pk=id_azienda)
     dipendenti = azienda.dipendenti.all()
@@ -170,6 +176,7 @@ def elimina_azienda(request, id_azienda):
 # =======================
 #   DIPENDENTI
 # =======================
+@login_required
 def lista_dipendenti(request):
     dipendenti = Dipendente.objects.all()
     return render(request, 'dipendenti/lista_dipendenti.html', {'dipendenti': dipendenti})
@@ -181,7 +188,7 @@ def dipendenti_details(request, dipendente_id):
         'dipendente': dipendente,
         'azienda': azienda
     })
-
+@login_required
 def dipendenti_crud(request, dipendente_id=None):
     if dipendente_id:
         dipendente = get_object_or_404(Dipendente, pk=dipendente_id)
@@ -272,7 +279,7 @@ def dipendenti_crud(request, dipendente_id=None):
         'dipendente': dipendente,
         'aziende': aziende,
     })
-    
+@login_required
 def dipendenti_delete(request, dipendente_id):
     """
     View per la cancellazione di un dipendente.
@@ -288,14 +295,15 @@ def dipendenti_delete(request, dipendente_id):
 # =======================
 #   PIANI FORMATIVI
 # =======================
+@login_required
 def lista_piani(request):
     piani = PianoFormativo.objects.all()
     return render(request, 'piani/lista_pianiformativi.html', {'piani': piani})
-
+@login_required
 def piano_details(request, id_piano):
     piano = get_object_or_404(PianoFormativo, pk=id_piano)
     return render(request, 'piani/piano_details.html', {'piano': piano})
-
+@login_required
 def piano_crud(request, id_piano=None):
     if id_piano:
         piano = get_object_or_404(PianoFormativo, pk=id_piano)
@@ -354,7 +362,7 @@ def piano_crud(request, id_piano=None):
         'progetti': progetti,
         'fondi': fondi,
     })
-
+@login_required
 def piano_elimina(request, id_piano):
     piano = get_object_or_404(PianoFormativo, pk=id_piano)
     piano.delete()
@@ -364,6 +372,7 @@ def piano_elimina(request, id_piano):
 # =======================
 #   PROGETTI
 # =======================
+@login_required
 def lista_progetti(request):
     """
     Mostra la lista dei progetti e i piani associati (se presenti).
@@ -387,11 +396,11 @@ def lista_progetti(request):
     return render(request, 'progetti/lista_progetti.html', {
         'progetti': progetti_render
     })
-
+@login_required
 def progetto_details(request, id_progetto):
     progetto = get_object_or_404(Progetto, pk=id_progetto)
     return render(request, 'progetti/progetto_details.html', {'progetto': progetto})
-
+@login_required
 def progetto_crud(request, id_progetto=None):
     if id_progetto:
         progetto = get_object_or_404(Progetto, pk=id_progetto)
@@ -421,6 +430,7 @@ def progetto_crud(request, id_progetto=None):
 
     return render(request, 'progetti/progetti_crud.html', {'progetto': progetto})
 
+@login_required
 def progetto_elimina(request, id_progetto):
     progetto = get_object_or_404(Progetto, pk=id_progetto)
     progetto.delete()
@@ -432,14 +442,17 @@ def progetto_elimina(request, id_progetto):
 #   MODULI (CRUD)
 # =======================
 
+@login_required
 def lista_moduli(request):
     moduli = Modulo.objects.all()
     return render(request, 'moduli/lista_moduli.html', {'moduli': moduli})
 
+@login_required
 def modulo_details(request, id_modulo):
     modulo = get_object_or_404(Modulo, pk=id_modulo)
     return render(request, 'moduli/modulo_details.html', {'modulo': modulo})
 
+@login_required
 def modulo_crud(request, id_modulo=None):
     """
     Creazione o modifica di un modulo.
@@ -471,6 +484,7 @@ def modulo_crud(request, id_modulo=None):
         'modulo': modulo
     })
 
+@login_required
 def modulo_elimina(request, id_modulo):
     modulo = get_object_or_404(Modulo, pk=id_modulo)
     modulo.delete()
@@ -483,6 +497,7 @@ def modulo_elimina(request, id_modulo):
 #   Wizard di associazione
 #   (esempio con Progetti e Piani)
 # =======================
+@login_required
 def wizard_propiani(request):
     """
     Esempio di 'wizard' che associa più Piani Formativi ad un Progetto.
@@ -517,6 +532,7 @@ def wizard_propiani(request):
 #   Allegati / Export
 # =======================
 
+@login_required
 def pagina_generazione_allegato(request, id_azienda):
     azienda = get_object_or_404(Azienda, pk=id_azienda)
     dipendenti = azienda.dipendenti.all()
@@ -548,6 +564,7 @@ def pagina_generazione_allegato(request, id_azienda):
     }
     return render(request, 'allegati/genera_allegato2bis.html', context)
 
+@login_required
 def seleziona_azienda_allegato(request):
     """
     View per selezionare un'azienda e reindirizzare alla pagina di generazione allegato.
@@ -565,6 +582,7 @@ def seleziona_azienda_allegato(request):
     context = {'aziende': aziende}
     return render(request, 'aziende/seleziona_azienda_allegato.html', context)
 
+@login_required
 def genera_allegato_excel(request, id_azienda):
     import os, io
     import openpyxl
@@ -642,6 +660,7 @@ def genera_allegato_excel(request, id_azienda):
 # =======================
 #   CALCOLI DI CONTRIBUTO
 # =======================
+@login_required
 def calcola_contributo(codice_fiscale, ore_lavorate, quota_retribuzione_oraria, quota_contribuzione_oraria):
     """
     Esempio: calcola il contributo totale per un lavoratore
@@ -661,6 +680,7 @@ def calcola_contributo(codice_fiscale, ore_lavorate, quota_retribuzione_oraria, 
         "contributo_totale": round(contributo_totale, 2),
     }
 
+@login_required
 def genera_dati_contributo(request, id_azienda):
     """
     Esempio di pagina che mostra un riepilogo di calcolo contributi
@@ -692,6 +712,7 @@ def genera_dati_contributo(request, id_azienda):
     })
 
 
+@login_required
 def wizard_allegato2bis(request):
     """
     Un'unica view per gestire:
@@ -819,6 +840,7 @@ def wizard_allegato2bis(request):
     
     
 
+@login_required
 def carica_azienda_openapi(request):
     partitaiva = request.GET.get('partitaiva', '').strip()
     if not partitaiva:
@@ -922,7 +944,7 @@ def carica_azienda_openapi(request):
         'status_societa': stato_attivita,
     })
 
-
+@login_required
 def update_azienda_openapi(request):
     partitaiva = request.GET.get('partitaiva', '').strip()
     if not partitaiva:
@@ -1002,6 +1024,7 @@ class ProgettoCreateView(CreateView):
         else:
             data['piani_formativi'] = PianoFormativoInlineFormSet(instance=self.object, prefix='piani_formativi')
         return data
+
     @transaction.atomic
     def form_valid(self, form):
         context = self.get_context_data()
@@ -1012,6 +1035,7 @@ class ProgettoCreateView(CreateView):
         piani_formativi.instance = self.object
         piani_formativi.save()
         return redirect(self.success_url)
+
 class ProgettoUpdateView(UpdateView):
     model = Progetto
     form_class = ProgettoForm
@@ -1034,6 +1058,7 @@ class ProgettoUpdateView(UpdateView):
         piani_formativi.instance = self.object
         piani_formativi.save()
         return redirect(self.success_url)
+@login_required
 def search_azienda(request):
     search_term = request.GET.get('term', '')
     page = request.GET.get('page', 1)
@@ -1055,6 +1080,7 @@ def search_azienda(request):
         'results': results,
         'pagination': {'more': end < total}
     })
+@login_required
 def search_modulo(request):
     search_term = request.GET.get('term', '')
     page = request.GET.get('page', 1)
@@ -1081,6 +1107,7 @@ def search_modulo(request):
 # =======================
 #    TIMESHEET
 # =======================
+@login_required
 def seleziona_azienda_timesheet(request):
     """
     Mostra una lista di aziende tra cui l'utente può scegliere.
@@ -1099,6 +1126,7 @@ def seleziona_azienda_timesheet(request):
 
     return render(request, 'aziende/seleziona_azienda_timesheet.html', {'aziende': aziende})
 
+@login_required
 def timesheet_per_azienda(request, id_azienda):
     # Recupera l'azienda specifica
     azienda = get_object_or_404(Azienda, pk=id_azienda)
@@ -1116,6 +1144,7 @@ def timesheet_per_azienda(request, id_azienda):
 
     return render(request, 'aziende/timesheet_per_azienda.html', context)
 
+@login_required
 def salva_timesheet(request, timesheet_id):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -1130,7 +1159,7 @@ def salva_timesheet(request, timesheet_id):
         return JsonResponse({"success": True, "message": "Timesheet aggiornato correttamente."})
     return JsonResponse({"success": False, "message": "Metodo non consentito."})
 
-
+@login_required
 def salva_tutti_timesheets(request):
     if request.method == "POST":
         try:
@@ -1156,3 +1185,66 @@ def salva_tutti_timesheets(request):
         except Exception as e:
             return JsonResponse({"success": False, "message": f"Errore durante l'aggiornamento: {str(e)}"})
     return JsonResponse({"success": False, "message": "Metodo non consentito."})
+
+
+
+
+# =======================
+#    autenticazione
+# =======================
+
+
+
+def login_view(request):
+    """
+    View per gestire il login degli utenti.
+    """
+    if request.method == 'POST':
+        form = CustomAuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f"Benvenuto, {username}!")
+                return redirect('index')  # Reindirizza alla homepage
+            else:
+                messages.error(request, "Credenziali non valide.")
+        else:
+            messages.error(request, "Errore nel form. Correggi i campi evidenziati.")
+    else:
+        form = CustomAuthenticationForm()
+
+    return render(request, 'accounts/auth_login.html', {'form': form})
+
+@login_required
+def logout_view(request):
+    """
+    View per eseguire il logout.
+    """
+    django_logout(request)
+    messages.success(request, "Sei uscito dall'account.")
+    return redirect('psbsrl_login')
+
+
+def register_view(request):
+    """
+    View per la registrazione di nuovi utenti 
+    usando il dominio psbsrl nell'email.
+    """
+    if request.method == 'POST':
+        form = PsbsrlRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()   # Salva l'utente
+            # Imposta il backend per il login
+            user.backend = 'django.contrib.auth.backends.ModelBackend'  # Sostituisci con il tuo backend se diverso
+            login(request, user)  # Esegui il login
+            messages.success(request, "Registrazione completata con successo! Benvenuto!")
+            return redirect('index')  # o altra pagina dopo registrazione
+        else:
+            messages.error(request, "Errore nella registrazione. Correggi i campi indicati.")
+    else:
+        form = PsbsrlRegistrationForm()
+
+    return render(request, 'accounts/auth_register.html', {'form': form})
