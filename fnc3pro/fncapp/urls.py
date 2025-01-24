@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import *
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -13,7 +14,11 @@ urlpatterns = [
     path('aziende/carica_azienda_openapi/', views.carica_azienda_openapi, name='carica_azienda_openapi'),
     path('aziende/update_azienda_openapi/', views.update_azienda_openapi, name='update_azienda_openapi'),
     path('aziende/elimina/<int:id_azienda>/', views.elimina_azienda, name='elimina_azienda'),
-
+    path('aziende/<int:id_azienda>/timesheets/', timesheet_per_azienda, name='timesheet_per_azienda'),
+    path('timesheet/salva/<int:timesheet_id>/', salva_timesheet, name='salva_timesheet'),
+    path('timesheet/salva_tutti/', views.salva_tutti_timesheets, name='salva_tutti_timesheets'),
+    path('seleziona-azienda/', views.seleziona_azienda_timesheet, name='seleziona_azienda_timesheet'),
+    
     # Dipendenti
     path('dipendenti/', views.lista_dipendenti, name='lista_dipendenti'),
     path('dipendenti/dettagli/<str:dipendente_id>/', views.dipendenti_details, name='dipendenti_details'),
@@ -42,6 +47,7 @@ urlpatterns = [
     path('associazioni/wizard-propiani/', views.wizard_propiani, name='wizard_propiani'),
     
     # allegato
+    path('allegati/seleziona-azienda/', views.seleziona_azienda_allegato, name='seleziona_azienda_allegato'),
     path('allegati/genera-allegato/<str:id_azienda>/', views.genera_allegato_excel, name='genera_allegato2bis'),
     path('allegati/pagina-generazione/<str:id_azienda>/', views.pagina_generazione_allegato, name='pagina_generazione_allegato'),
     

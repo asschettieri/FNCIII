@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- ========== Page Title Start ========== -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="mb-0 fw-semibold">Timesheet per {{ azienda.nome }}</h4>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'lista_aziende' %}">Lista Aziende</a></li>
+                <li class="breadcrumb-item active">Timesheet</li>
+            </ol>
+        </div>
+    </div>
+</div>
+<!-- ========== Page Title End ========== -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+             <div class="card-header border-0">
+                  <div class="row justify-content-between">
+                       <!-- Colonna di ricerca -->
+                       <div class="col-lg-6">
+                            <div class="row align-items-center">
+                                 <div class="col-lg-6">
+                                      <form class="app-search d-none d-md-block me-auto">
+                                           <div class="position-relative">
+                                                <input type="search" class="form-control" placeholder="Cerca Dipendente o Timesheet" autocomplete="off" id="searchInput">
+                                                <iconify-icon icon="solar:magnifer-broken" class="search-widget-icon"></iconify-icon>
+                                           </div>
+                                      </form>
+                                 </div>
+                                 <div class="col-lg-4">
+                                      <h5 class="text-dark fw-medium mb-0">
+                                       Totale Dipendenti: {{ timesheets|length }}
+                                      </h5>
+                                 </div>
+                            </div>
+                       </div>
+                       <!-- Colonna delle azioni -->
+                       <div class="col-lg-6">
+                            <div class="text-md-end mt-3 mt-md-0">
+                                <!-- Bottone IMPOSTAZIONI -->
+                                <button type="button" class="btn btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                                    <i class="ri-settings-2-line me-1"></i>Impostazioni
+                                </button>
+
+                                <!-- Bottone FILTRA -->
+                                <button type="button" class="btn btn-outline-primary me-1" id="toggleFiltersBtn">
+                                    <i class="ri-filter-line me-1"></i> Filtri
+                                </button>
+
+                                <!-- Bottone SALVA TUTTO -->
+                                <button type="button" class="btn btn-success me-1" id="saveAllBtn">
+                                    <i class="ri-save-3-line me-1"></i> Salva Tutto
+                                </button>
+                            </div>
+                       </div><!-- end col-->
+                  </div>
+             </div>
+        </div>
+   </div>
+</div>
+
+<!-- Modal Impostazioni -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="columnSettingsForm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Impostazioni Colonne</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          <p>Seleziona/deseleziona le colonne da mostrare:</p>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-dipendente" id="checkDipendente" checked>
+            <label class="form-check-label" for="checkDipendente">Dipendente</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-modulo" id="checkModulo" checked>
+            <label class="form-check-label" for="checkModulo">Piano Modulo</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-ore-previste" id="checkOrePreviste" checked>
+            <label class="form-check-label" for="checkOrePreviste">Ore Previste</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-ore-effettuate" id="checkOreEffettuate" checked>
+            <label class="form-check-label" for="checkOreEffettuate">Ore Effettuate</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-importo-retributivo" id="checkImportoRetributivo" checked>
+            <label class="form-check-label" for="checkImportoRetributivo">Importo Retributivo</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-importo-contributivo" id="checkImportoContributivo" checked>
+            <label class="form-check-label" for="checkImportoContributivo">Importo Contributivo</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input column-checkbox" type="checkbox" value="col-azioni" id="checkAzioni" checked>
+            <label class="form-check-label" for="checkAzioni">Azioni</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+          <button type="submit" class="btn btn-primary">Applica modifiche</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="col-xl-12">
+     <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center border-bottom">
+               <div>
+                    <h4 class="card-title mb-0">Timesheet Associati</h4>
+               </div>
+          </div>
+
+          <!-- Tabella con campi modificabili -->
+          <div class="table-responsive">
+            <table class="table align-middle text-nowrap table-hover table-centered mb-0" id="timesheetTable">
+                <thead class="bg-light-subtle">
+                    <tr>
+                        <th class="col-dipendente">Dipendente</th>
+                        <th class="col-modulo">Piano Modulo</th>
+                        <th class="col-ore-previste">Ore Previste</th>
+                        <th class="col-ore-effettuate">Ore Effettuate</th>
+                        <th class="col-importo-retributivo">Importo Retributivo</th>
+                        <th class="col-importo-contributivo">Importo Contributivo</th>
+                        <th class="col-azioni">Azioni</th>
+                    </tr>
+                    <!-- Riga dei filtri -->
+                    <tr class="filters-row" style="display: none;">
+                        <th><input type="text" class="form-control filter-input" data-col="col-dipendente" placeholder="Filtra Dipendente"></th>
+                        <th><input type="text" class="form-control filter-input" data-col="col-modulo" placeholder="Filtra Modulo"></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for timesheet in timesheets %}
+                    <tr>
+                        <td class="col-dipendente" data-id="{{ timesheet.id }}">{{ timesheet.dipendente.nome }} {{ timesheet.dipendente.cognome }}</td>
+                        <td class="col-modulo">{{ timesheet.piano_modulo }}</td>
+                        <td class="col-ore-previste">
+                            <input type="number" class="form-control form-control-sm" 
+                                   value="{{ timesheet.ore_previste }}" 
+                                   id="orePreviste-{{ timesheet.id }}">
+                        </td>
+                        <td class="col-ore-effettuate">
+                            <input type="number" class="form-control form-control-sm" 
+                                   value="{{ timesheet.ore_effettuate }}" 
+                                   id="oreEffettuate-{{ timesheet.id }}">
+                        </td>
+                        <td class="col-importo-retributivo">
+                            <input type="number" class="form-control form-control-sm" 
+                                   value="{{ timesheet.importo_retributivo }}" 
+                                   id="importoRetributivo-{{ timesheet.id }}">
+                        </td>
+                        <td class="col-importo-contributivo">
+                            <input type="number" class="form-control form-control-sm" 
+                                   value="{{ timesheet.importo_contributivo }}" 
+                                   id="importoContributivo-{{ timesheet.id }}">
+                        </td>
+                        <td class="col-azioni">
+                            <button class="btn btn-soft-primary btn-sm" 
+                                    onclick="salvaTimesheet({{ timesheet.id }})">
+                                <iconify-icon icon="solar:pen-2-broken" class="align-middle fs-18"></iconify-icon> Salva
+                            </button>
+                            <button class="btn btn-soft-danger btn-sm" 
+                                    onclick="confermaEliminaTimesheet({{ timesheet.id }})">
+                                <iconify-icon icon="solar:trash-bin-minimalistic-2-broken" class="align-middle fs-18"></iconify-icon> Elimina
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">Nessun timesheet trovato per questa azienda.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+          </div>
+     </div>
+</div>
+
+<!-- Script per la gestione delle azioni -->
+<script>
+    // Bottone per attivare/disattivare i filtri
+    const toggleFiltersBtn = document.getElementById('toggleFiltersBtn');
+    const filtersRow = document.querySelector('.filters-row');
+
+    toggleFiltersBtn.addEventListener('click', () => {
+        filtersRow.style.display = filtersRow.style.display === 'none' || filtersRow.style.display === '' ? 'table-row' : 'none';
+    });
+
+    // Funzione per filtrare le righe
+    const filterInputs = document.querySelectorAll('.filter-input');
+    filterInputs.forEach(input => {
+        input.addEventListener('input', function () {
+            const colClass = this.getAttribute('data-col');
+            const filterValue = this.value.toLowerCase();
+
+            const rows = document.querySelectorAll('#timesheetTable tbody tr');
+            rows.forEach(row => {
+                const cell = row.querySelector(`.${colClass}`);
+                if (cell && cell.textContent.toLowerCase().includes(filterValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Gestione del form di impostazioni colonne
+    const columnCheckboxes = document.querySelectorAll('.column-checkbox');
+    const columnSettingsForm = document.getElementById('columnSettingsForm');
+
+    columnSettingsForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        columnCheckboxes.forEach(checkbox => {
+            const colClass = checkbox.value;
+            const isVisible = checkbox.checked;
+
+            const elements = document.querySelectorAll(`.${colClass}`);
+            elements.forEach(el => {
+                el.style.display = isVisible ? '' : 'none';
+            });
+        });
+
+        const settingsModal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
+        settingsModal.hide();
+    });
+
+    // Funzione per salvare un timesheet tramite chiamata AJAX
+    function salvaTimesheet(timesheetId) {
+        const orePreviste = document.getElementById(`orePreviste-${timesheetId}`).value;
+        const oreEffettuate = document.getElementById(`oreEffettuate-${timesheetId}`).value;
+        const importoRetributivo = document.getElementById(`importoRetributivo-${timesheetId}`).value;
+        const importoContributivo = document.getElementById(`importoContributivo-${timesheetId}`).value;
+
+        fetch(`/timesheet/salva/${timesheetId}/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({
+                ore_previste: orePreviste,
+                ore_effettuate: oreEffettuate,
+                importo_retributivo: importoRetributivo,
+                importo_contributivo: importoContributivo,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire("Successo", "Timesheet aggiornato correttamente!", "success");
+            } else {
+                Swal.fire("Errore", "Impossibile aggiornare il timesheet.", "error");
+            }
+        })
+        .catch(error => {
+            console.error("Errore nella richiesta:", error);
+            Swal.fire("Errore", "Si è verificato un problema durante il salvataggio.", "error");
+        });
+    }
+
+    // Funzione per salvare tutte le modifiche ai timesheet
+    document.getElementById('saveAllBtn').addEventListener('click', function () {
+        const rows = document.querySelectorAll('#timesheetTable tbody tr');
+        const updates = [];
+    
+        rows.forEach(row => {
+            const timesheetId = row.querySelector('.col-dipendente')?.getAttribute('data-id');
+            if (timesheetId) {
+                updates.push({
+                    id: timesheetId,
+                    ore_previste: row.querySelector(`#orePreviste-${timesheetId}`).value || null,
+                    ore_effettuate: row.querySelector(`#oreEffettuate-${timesheetId}`).value || null,
+                    importo_retributivo: row.querySelector(`#importoRetributivo-${timesheetId}`).value || null,
+                    importo_contributivo: row.querySelector(`#importoContributivo-${timesheetId}`).value || null,
+                });
+            }
+        });
+    
+        // Controlla che ci siano aggiornamenti
+        if (updates.length === 0) {
+            Swal.fire("Errore", "Nessun timesheet trovato da aggiornare!", "error");
+            return;
+        }
+    
+        // Invia i dati al server
+        fetch('/timesheet/salva_tutti/', {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({ updates }), // Invia gli aggiornamenti
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire("Successo", "Tutti i timesheet sono stati aggiornati correttamente!", "success");
+            } else {
+                Swal.fire("Errore", data.message, "error");
+            }
+        })
+        .catch(error => {
+            console.error("Errore nella richiesta:", error);
+            Swal.fire("Errore", "Si è verificato un problema durante il salvataggio.", "error");
+        });
+    });
+
+    // Funzione per confermare l'eliminazione di un timesheet
+    function confermaEliminaTimesheet(timesheetId) {
+        Swal.fire({
+            title: "Sei sicuro?",
+            text: "Questa azione eliminerà definitivamente il timesheet.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sì, elimina!",
+            cancelButtonText: "Annulla",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/timesheet/elimina/${timesheetId}/`;
+            }
+        });
+    }
+</script>
+
+{% endblock content %}

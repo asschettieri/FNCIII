@@ -6,6 +6,7 @@ import os, io, logging
 import openpyxl
 import pyexcel_ods3 as ods
 import uuid
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
@@ -15,18 +16,7 @@ from django.db import transaction
 from django.views.generic import CreateView, UpdateView
 
 # Import dei tuoi model
-from .models import (
-    Azienda,
-    Dipendente,
-    Progetto,
-    ProgettoAzienda,
-    PianoFormativo,
-    PianoModulo,
-    Timesheet,
-    Modulo,
-    TipoFondo,
-    CodiceAteco
-)
+from .models import *
 from .services_openapi import connection_openapi, normalize_ateco
 
 # =======================
@@ -39,16 +29,19 @@ def index(request):
 #    AZIENDE
 # =======================
 def lista_aziende(request):
+    # Conta il totale delle aziende
     aziende = Azienda.objects.all()
-    return render(request, 'aziende/lista_aziende.html', {'aziende': aziende})
+    totale_aziende = aziende.count()
+    return render(request, 'aziende/lista_aziende.html', {'aziende': aziende, 'totale_aziende': totale_aziende})
 
+logger = logging.getLogger(__name__)
 def aziende_details(request, id_azienda):
     azienda = get_object_or_404(Azienda, pk=id_azienda)
     
     # Dipendenti associati all'azienda
     dipendenti = azienda.dipendenti.all()
-
-    # Verifica prerequisiti (esempio di logica):
+    
+    # Verifica prerequisiti (esempio di logica)
     # 1. Almeno un dipendente
     dipendenti_presenti = dipendenti.exists()
 
@@ -57,16 +50,17 @@ def aziende_details(request, id_azienda):
     piani_presenti = timesheets_azienda.exists()
 
     # 3. Tutti i timesheet hanno ore_effettuate > 0
-    #    se non ci sono affatto timesheet, questa condizione risulta False
-    ore_registrate = False
-    if timesheets_azienda.exists():
-        ore_registrate = all(
-            (ts.ore_effettuate is not None and ts.ore_effettuate > 0)
-            for ts in timesheets_azienda
-        )
+    ore_registrate = all(
+        (ts.ore_effettuate is not None and ts.ore_effettuate > 0)
+        for ts in timesheets_azienda
+    ) if piani_presenti else False
 
+    # Calcola i prerequisiti generali
     prerequisiti = dipendenti_presenti and piani_presenti and ore_registrate
 
+    # Log utile per debug
+    logger.info(f"Azienda: {azienda.nome}, Dipendenti: {dipendenti.count()}")
+    # Passa i dati al template
     context = {
         'azienda': azienda,
         'dipendenti': dipendenti,
@@ -74,8 +68,6 @@ def aziende_details(request, id_azienda):
     }
     return render(request, 'aziende/aziende_details.html', context)
 
-# Configura il logger
-logger = logging.getLogger(__name__)
 
 def azienda_crud(request, id_azienda=None):
     """
@@ -152,9 +144,11 @@ def azienda_crud(request, id_azienda=None):
 def azienda_dipendenti(request, id_azienda):
     azienda = get_object_or_404(Azienda, pk=id_azienda)
     dipendenti = azienda.dipendenti.all()
+    totale_dipendenti = dipendenti.count()  # Calcola il totale dei dipendenti
     context = {
         'azienda': azienda,
         'dipendenti': dipendenti,
+        'totale_dipendenti': totale_dipendenti,  # Passa il totale al template
     }
     return render(request, 'aziende/azienda_dipendenti.html', context)
 
@@ -554,6 +548,22 @@ def pagina_generazione_allegato(request, id_azienda):
     }
     return render(request, 'allegati/genera_allegato2bis.html', context)
 
+def seleziona_azienda_allegato(request):
+    """
+    View per selezionare un'azienda e reindirizzare alla pagina di generazione allegato.
+    """
+    if request.method == 'POST':
+        id_azienda = request.POST.get('id_azienda')
+        if id_azienda:
+            # Reindirizza alla view `pagina_generazione_allegato`
+            return redirect('pagina_generazione_allegato', id_azienda=id_azienda)
+        else:
+            messages.error(request, "Seleziona un'azienda valida.")
+
+    # Recupera tutte le aziende
+    aziende = Azienda.objects.all()
+    context = {'aziende': aziende}
+    return render(request, 'aziende/seleziona_azienda_allegato.html', context)
 
 def genera_allegato_excel(request, id_azienda):
     import os, io
@@ -1066,3 +1076,83 @@ def search_modulo(request):
         'results': results,
         'pagination': {'more': end < total}
     })
+    
+    
+# =======================
+#    TIMESHEET
+# =======================
+def seleziona_azienda_timesheet(request):
+    """
+    Mostra una lista di aziende tra cui l'utente può scegliere.
+    Una volta selezionata, reindirizza alla pagina corretta.
+    """
+    aziende = Azienda.objects.all()  # Recupera tutte le aziende
+    if request.method == 'POST':
+        # Recupera l'ID dell'azienda selezionata
+        id_azienda = request.POST.get('id_azienda')
+        if id_azienda:
+            # Salva l'azienda in sessione (opzionale)
+            request.session['azienda_selezionata'] = id_azienda
+            return redirect('timesheet_per_azienda', id_azienda=id_azienda)
+        else:
+            messages.error(request, "Seleziona un'azienda valida.")
+
+    return render(request, 'aziende/seleziona_azienda_timesheet.html', {'aziende': aziende})
+
+def timesheet_per_azienda(request, id_azienda):
+    # Recupera l'azienda specifica
+    azienda = get_object_or_404(Azienda, pk=id_azienda)
+
+    # Recupera i dipendenti associati all'azienda
+    dipendenti = azienda.dipendenti.all()
+
+    # Recupera tutti i timesheet associati ai dipendenti di questa azienda
+    timesheets = Timesheet.objects.filter(dipendente__in=dipendenti).select_related('dipendente', 'piano_modulo')
+
+    context = {
+        'azienda': azienda,
+        'timesheets': timesheets,
+    }
+
+    return render(request, 'aziende/timesheet_per_azienda.html', context)
+
+def salva_timesheet(request, timesheet_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        timesheet = get_object_or_404(Timesheet, pk=timesheet_id)
+
+        timesheet.ore_previste = data.get("ore_previste")
+        timesheet.ore_effettuate = data.get("ore_effettuate")
+        timesheet.importo_retributivo = data.get("importo_retributivo")
+        timesheet.importo_contributivo = data.get("importo_contributivo")
+        timesheet.save()
+
+        return JsonResponse({"success": True, "message": "Timesheet aggiornato correttamente."})
+    return JsonResponse({"success": False, "message": "Metodo non consentito."})
+
+
+def salva_tutti_timesheets(request):
+    if request.method == "POST":
+        try:
+            # Carica i dati inviati nella richiesta
+            data = json.loads(request.body)
+            updates = data.get("updates", [])
+            print("Dati ricevuti:", updates)  # Stampa i dati nel log per verificare
+
+            for update in updates:
+                # Recupera il timesheet dal database
+                timesheet = Timesheet.objects.get(pk=update["id"])
+                
+                # Aggiorna i campi del timesheet
+                timesheet.ore_previste = update.get("ore_previste", timesheet.ore_previste)
+                timesheet.ore_effettuate = update.get("ore_effettuate", timesheet.ore_effettuate)
+                timesheet.importo_retributivo = update.get("importo_retributivo", timesheet.importo_retributivo)
+                timesheet.importo_contributivo = update.get("importo_contributivo", timesheet.importo_contributivo)
+                timesheet.save()
+
+            return JsonResponse({"success": True, "message": "Tutti i timesheet sono stati aggiornati correttamente."})
+        except Timesheet.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Un timesheet specificato non esiste."})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": f"Errore durante l'aggiornamento: {str(e)}"})
+    return JsonResponse({"success": False, "message": "Metodo non consentito."})

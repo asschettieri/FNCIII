@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid p-4">
+    <h1 class="text-center text-dark mb-5">Scarica Allegato 2 bis</h1>
+  
+    <!-- =============================================
+         STEP 1: SELEZIONA AZIENDA
+         ============================================= -->
+    <div id="step1" class="wizard-step bg-light border rounded p-4 shadow-sm mb-4">
+      <h2 class="mb-3">Seleziona Azienda</h2>
+  
+      <!-- Campo di ricerca per filtrare le aziende nel select -->
+      <div class="form-group mb-3">
+        <label for="search_azienda" class="form-label text-dark">Cerca Azienda</label>
+        <input type="text" id="search_azienda" class="form-control"
+               placeholder="Digita per cercare..."
+               onkeyup="filterAziende()" />
+      </div>
+  
+      <div class="form-group mb-3">
+        <label for="azienda_id" class="form-label text-dark">Azienda</label>
+        <select class="form-select" name="azienda_id" id="azienda_id" size="1">
+            <option value="">-- Seleziona --</option>
+            {% for az in aziende %}
+            <option value="{{ az.id }}"
+                    data-email="{{ az.email }}"
+                    data-telefono="{{ az.telefono }}"
+                    data-cellulare="{{ az.cellulare }}"
+                    data-indirizzo="{{ az.indirizzosl }}">
+              {{ az.nome }}
+            </option>
+            {% endfor %}
+          </select>
+      </div>
+  
+      <!-- Informazioni aggiuntive sull'azienda selezionata -->
+      <div id="azienda_info" class="mt-3 p-3 bg-white border rounded shadow-sm d-none">
+        <h3 class="text-info">Informazioni Azienda</h3>
+        <p><strong>Email:</strong> <span id="info_email"></span></p>
+        <p><strong>Telefono:</strong> <span id="info_telefono"></span></p>
+        <p><strong>Cellulare:</strong> <span id="info_cellulare"></span></p>
+        <p><strong>Indirizzo:</strong> <span id="info_indirizzo"></span></p>
+      </div>
+  
+      <button class="btn btn-success mt-3 w-100" id="next_button" disabled onclick="proceedToGenerazione()">Avanti</button>
+    </div>
+  </div>
+  <script>
+    // Funzione per filtrare le aziende nel menu a tendina e aprire il menu
+    function filterAziende() {
+      const searchInput = document.getElementById("search_azienda").value.toLowerCase(); // Ottieni il valore dell'input
+      const aziendaSelect = document.getElementById("azienda_id"); // Ottieni il select
+      const aziendaOptions = aziendaSelect.options; // Ottieni tutte le opzioni del select
+  
+      let hasResults = false; // Variabile per tracciare se ci sono risultati visibili
+  
+      // Itera attraverso le opzioni e mostra/nascondi quelle che corrispondono al filtro
+      for (let i = 0; i < aziendaOptions.length; i++) {
+        const option = aziendaOptions[i];
+        if (option.text.toLowerCase().includes(searchInput)) {
+          option.style.display = ""; // Mostra l'opzione
+          hasResults = true;
+        } else {
+          option.style.display = "none"; // Nascondi l'opzione
+        }
+      }
+  
+      // Se ci sono risultati, apri il menu a tendina
+      if (hasResults) {
+        aziendaSelect.size = Math.min(aziendaOptions.length, 5); // Mostra un massimo di 5 opzioni visibili
+        aziendaSelect.style.display = ""; // Assicurati che il select sia visibile
+      } else {
+        aziendaSelect.size = 1; // Torna alla dimensione originale
+      }
+    }
+  
+    // Event listener per aggiornare le informazioni sull'azienda selezionata
+    document.getElementById("azienda_id").addEventListener("change", function () {
+      const selectedOption = this.options[this.selectedIndex];
+      const aziendaInfoDiv = document.getElementById("azienda_info");
+  
+      if (selectedOption.value) {
+        document.getElementById("info_email").textContent = selectedOption.getAttribute("data-email") || "N/A";
+        document.getElementById("info_telefono").textContent = selectedOption.getAttribute("data-telefono") || "N/A";
+        document.getElementById("info_cellulare").textContent = selectedOption.getAttribute("data-cellulare") || "N/A";
+        document.getElementById("info_indirizzo").textContent = selectedOption.getAttribute("data-indirizzo") || "N/A";
+  
+        aziendaInfoDiv.classList.remove("d-none");
+        document.getElementById("next_button").disabled = false;
+  
+        // Riduci la dimensione del menu dopo la selezione
+        this.size = 1;
+      } else {
+        aziendaInfoDiv.classList.add("d-none");
+        document.getElementById("next_button").disabled = true;
+      }
+    });
+  
+    // Ripristina la dimensione del menu a tendina quando non si sta cercando
+    document.getElementById("search_azienda").addEventListener("blur", function () {
+      const aziendaSelect = document.getElementById("azienda_id");
+      aziendaSelect.size = 1;
+    });
+
+// Funzione per avanzare con id nel link
+    function proceedToGenerazione() {
+        const aziendaId = document.getElementById("azienda_id").value; // Ottieni l'ID dell'azienda selezionata
+    
+        if (aziendaId) {
+          // Redireziona alla view `pagina_generazione_allegato` con l'ID selezionato
+          window.location.href = `/allegati/pagina-generazione/${aziendaId}/`;
+        } else {
+          alert("Per favore, seleziona un'azienda prima di procedere.");
+        }
+      }
+  </script>
+  
+{% endblock %}
