@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Gestisci Fondo{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title">Crea nuovo TipoFondo</h4>
+            </div>
+            <div class="card-body">
+                <form action="." method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <h5 class="font-weight-bold">Inserisci i dettagli del TipoFondo</h5>
+                        <p class="text-muted">Compila i campi sottostanti per creare un nuovo TipoFondo.</p>
+                    </div>
+
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <p>Si prega di correggere i seguenti errori:</p>
+                            <ul>
+                                {% for field in form %}
+                                    {% if field.errors %}
+                                        {% for error in field.errors %}
+                                            <li><b>{{ field.label }}:</b> {{ error|striptags }}</li>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    {{ form.as_p }}
+
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-primary py-2 mt-4" type="submit">Salva</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
