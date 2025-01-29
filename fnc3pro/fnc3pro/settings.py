@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'fnc3pro.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', 
-        'NAME': 'fnc3',              
+        'NAME': 'fnc3_roby',              
         'USER': 'root',                       
         'PASSWORD': 'fqvUPfFrstAVPkPNPuCd1',                  
         'HOST': '10.20.40.110',               
