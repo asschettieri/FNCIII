@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+{% load static %}
+<div class="account-pages pt-2 pt-sm-5 pb-4 pb-sm-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-5">
+                <div class="card auth-card">
+                    <div class="card-body px-3 py-5">
+                        <div class="mx-auto mb-4 text-center auth-logo">
+                            <img src="{% static 'images/fnclogo-light.svg' %}" height="80" alt="logo dark">
+                        </div>
+
+                        <h2 class="fw-bold text-uppercase text-center fs-18">Crea un Account</h2>
+                        <p class="text-muted text-center mt-1 mb-4">
+                            Sei nuovo sulla nostra piattaforma? Registrati ora! Richiede solo un minuto.
+                        </p>
+
+                        <div class="px-4">
+                            <form action="{% url 'psbsrl_register' %}" method="post" class="authentication-form">
+                                {% csrf_token %}
+
+                                <!-- Mostra eventuali errori generali -->
+                                {% if form.non_field_errors %}
+                                    <div class="alert alert-danger">
+                                        {{ form.non_field_errors }}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Campo Username -->
+                                <div class="mb-3">
+                                    <label class="form-label" for="id_username">Username</label>
+                                    {{ form.username }}
+                                    {% if form.username.errors %}
+                                        <div class="text-danger small">{{ form.username.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Campo Email -->
+                                <div class="mb-3">
+                                    <label class="form-label" for="id_email">Email</label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="text-danger small">{{ form.email.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Campo Password -->
+                                <div class="mb-3">
+                                    <label class="form-label" for="id_password1">Password</label>
+                                    {{ form.password1 }}
+                                    {% if form.password1.errors %}
+                                        <div class="text-danger small">{{ form.password1.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Campo Conferma Password -->
+                                <div class="mb-3">
+                                    <label class="form-label" for="id_password2">Conferma Password</label>
+                                    {{ form.password2 }}
+                                    {% if form.password2.errors %}
+                                        <div class="text-danger small">{{ form.password2.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-1 text-center d-grid">
+                                    <button class="btn btn-danger py-2" type="submit">Crea Account</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <p class="mb-0 text-center text-dark">
+                    Hai già un account?
+                    <a href="{% url 'psbsrl_login' %}" class="text-reset text-unline-dashed fw-bold ms-1">Accedi</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SweetAlert Integration -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    {% if messages %}
+    {% for message in messages %}
+    Swal.fire({
+        icon: '{% if message.tags == "success" %}success{% elif message.tags == "error" %}error{% else %}info{% endif %}',
+        title: "{{ message|escapejs }}",
+        showConfirmButton: true,
+        timer: 5000
+    });
+    {% endfor %}
+    {% endif %}
+</script>
+{% endblock content %}

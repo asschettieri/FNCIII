@@ -2,6 +2,9 @@ from django.db import models
 
 class TipoFondo(models.Model):
     nome = models.CharField(max_length=255)
+    percentuale_dad = models.FloatField(default=0)
+    percentuale_fad = models.FloatField(default=0)
+
     def __str__(self):
         return self.nome
     
@@ -73,21 +76,8 @@ class ProgettoAzienda(models.Model):
         
 class PianoFormativo(models.Model):
     nome = models.CharField(max_length=255)
-    # Ora permettiamo null:
-    progetto = models.ForeignKey(
-        Progetto,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='piani_formativi'
-    )
-    fondo = models.ForeignKey(
-        TipoFondo,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='piani_formativi'
-    )
+    progetto = models.ForeignKey(Progetto, on_delete=models.CASCADE, related_name='piani_formativi')
+    fondo = models.ForeignKey(TipoFondo, on_delete=models.SET_NULL, null=True, related_name='piani_formativi')
     moduli = models.ManyToManyField(Modulo, through='PianoModulo')
     data_inizio = models.DateField(blank=True, null=True)
     data_fine = models.DateField(blank=True, null=True)
@@ -109,9 +99,9 @@ class Timesheet(models.Model):
     ore_effettuate = models.FloatField(blank=True, null=True)
     importo_retributivo = models.FloatField(blank=True, null=True)
     importo_contributivo = models.FloatField(blank=True, null=True)
+
     class Meta:
         unique_together = ('dipendente', 'piano_modulo')
-
 
 class RappresentanteSindacale(models.Model):
     nome_cognome = models.CharField(max_length=100, blank=False, null=False)

@@ -82,6 +82,9 @@
                             <li class="sub-nav-item">
                                 <a class="sub-nav-link" href="{% url 'crea_dipendente' %}">Aggiungi Dipendenti</a>
                             </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{% url 'wizard_allegato2bis' %}">Aggiungi Allegato2bis</a>
+                            </li>
                         </ul>
                     </div>
                 </li>
@@ -89,7 +92,7 @@
                 <li class="nav-item">
                     <a class="nav-link menu-arrow" href="#sidebarTables" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarTables">
                          <span class="nav-icon">
-                              <i class="ri-news-line"></i>
+                              <i class='bx bxl-product-hunt'></i>
                          </span>
                          <span class="nav-text"> Progetti </span>
                     </a>
@@ -110,85 +113,42 @@
                          </ul>
                     </div>
                 </li>
-                
-               <li class="menu-title">Custom</li>
 
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'seleziona_azienda_timesheet' %}">
+                         <span class="nav-icon">
+                              <i class="ri-time-line"></i>
+                         </span>
+                         <span class="nav-text"> Timesheet </span>
+                    </a>
+                </li>
+                <li class="menu-title">Allegati</li>
                <li class="nav-item">
                     <a class="nav-link menu-arrow" href="#sidebarPages" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarPages">
                          <span class="nav-icon">
                               <i class="ri-pages-line"></i>
                          </span>
-                         <span class="nav-text"> Pages </span>
+                         <span class="nav-text">Allegati </span>
                     </a>
                     <div class="collapse" id="sidebarPages">
                          <ul class="nav sub-navbar-nav">
                               <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="pages-starter.html">Welcome</a>
+                                   <a class="sub-nav-link" href="{% url 'seleziona_azienda_allegato' %}">Allegato 2 bis</a>
                               </li>
-                              <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="pages-calendar.html">Calendar</a>
-                              </li>
-                              <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="pages-invoice.html">Invoice</a>
-                              </li>
-                              <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="pages-faqs.html">FAQs</a>
-                              </li>
-                              <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="pages-comingsoon.html">Coming Soon</a>
-                              </li>
-                              <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="pages-timeline.html">Timeline</a>
-                              </li>
-                              <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="pages-pricing.html">Pricing</a>
-                              </li>
-                              <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="pages-maintenance.html">Maintenance</a>
-                              </li>
-                              <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="pages-404.html">404 Error</a>
-                              </li>
-                              <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="pages-404-alt.html">404 Error (alt)</a>
-                              </li>
+
                          </ul>
                     </div>
                </li> <!-- end Pages Menu -->
-
+               <li class="menu-title">Autenticazione</li>
                <li class="nav-item">
-                    <a class="nav-link menu-arrow" href="#sidebarAuthentication" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAuthentication">
-                         <span class="nav-icon">
-                              <i class="ri-lock-password-line"></i>
-                         </span>
-                         <span class="nav-text"> Authentication </span>
-                    </a>
-                    <div class="collapse" id="sidebarAuthentication">
-                         <ul class="nav sub-navbar-nav">
-                              <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="auth-signin.html">Sign In</a>
-                              </li>
-                              <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="auth-signup.html">Sign Up</a>
-                              </li>
-                              <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="auth-password.html">Reset Password</a>
-                              </li>
-                              <li class="sub-nav-item">
-                                   <a class="sub-nav-link" href="auth-lock-screen.html">Lock Screen</a>
-                              </li>
-                         </ul>
-                    </div>
+                   <a class="nav-link menu-arrow" href="{% url 'psbsrl_logout' %}">
+                       <span class="nav-icon">
+                           <i class="ri-lock-password-line"></i>
+                       </span>
+                       <span class="nav-text"> Logout </span>
+                   </a>
                </li>
-
-               <li class="nav-item">
-                    <a class="nav-link disabled" href="javascript:void(0);">
-                         <span class="nav-icon">
-                              <i class="ri-prohibited-2-line"></i>
-                         </span>
-                         <span class="nav-text"> Disable Item </span>
-                    </a>
-               </li> <!-- end Demo Menu Item -->
+               
           </ul>
      </div>
 </div>

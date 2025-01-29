@@ -61,10 +61,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
     <script src="{% static 'js/pages/dashboard-analytics.js' %}"></script>
+    <script src="{% static 'js/datatables.min.js' %}"></script>
     <script src="{% static 'js/jquery.bootstrap-duallistbox.js' %}"></script>
     <div class="wrapper">
-        {% include 'main-nav.html' %}
-        {% include 'sidebar.html' %}
+        {% if request.path != '/login/' and request.path != '/register/' %}
+            {% include 'main-nav.html' %}
+            {% include 'sidebar.html' %}
+        {% endif %}
         <div class="page-content">
             <div class="container-fluid">
                 {% block content %}
@@ -73,6 +76,7 @@
             {% include 'footer.html' %}
         </div>
     </div>
+    
 
     <script src="{% static 'js/vendor.js' %}"></script>
     <script src="{% static 'js/app.js' %}"></script>

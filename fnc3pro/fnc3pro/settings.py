@@ -52,6 +52,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'fnc3pro.urls'
+LOGIN_URL = '/login/'
 
 TEMPLATES = [
     {
@@ -137,3 +138,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Percorso assoluto ai documenti statici
 DOCUMENTS_ROOT = os.path.join(BASE_DIR, 'staticfiles/documenti')
+
+AUTHENTICATION_BACKENDS = [
+    'fncapp.auth_backend.EmailOrUsernameModelBackend',  
+    'django.contrib.auth.backends.ModelBackend',       
+]

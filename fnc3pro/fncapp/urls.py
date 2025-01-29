@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import *
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -13,7 +14,11 @@ urlpatterns = [
     path('aziende/carica_azienda_openapi/', views.carica_azienda_openapi, name='carica_azienda_openapi'),
     path('aziende/update_azienda_openapi/', views.update_azienda_openapi, name='update_azienda_openapi'),
     path('aziende/elimina/<int:id_azienda>/', views.elimina_azienda, name='elimina_azienda'),
-
+    path('aziende/<int:id_azienda>/timesheets/', timesheet_per_azienda, name='timesheet_per_azienda'),
+    path('timesheet/salva/<int:timesheet_id>/', salva_timesheet, name='salva_timesheet'),
+    path('timesheet/salva_tutti/', views.salva_tutti_timesheets, name='salva_tutti_timesheets'),
+    path('seleziona-azienda/', views.seleziona_azienda_timesheet, name='seleziona_azienda_timesheet'),
+    
     # Dipendenti
     path('dipendenti/', views.lista_dipendenti, name='lista_dipendenti'),
     path('dipendenti/dettagli/<str:dipendente_id>/', views.dipendenti_details, name='dipendenti_details'),
@@ -42,6 +47,7 @@ urlpatterns = [
     path('associazioni/wizard-propiani/', views.wizard_propiani, name='wizard_propiani'),
     
     # allegato
+    path('allegati/seleziona-azienda/', views.seleziona_azienda_allegato, name='seleziona_azienda_allegato'),
     path('allegati/genera-allegato/<str:id_azienda>/', views.genera_allegato_excel, name='genera_allegato2bis'),
     path('allegati/pagina-generazione/<str:id_azienda>/', views.pagina_generazione_allegato, name='pagina_generazione_allegato'),
     
@@ -52,8 +58,19 @@ urlpatterns = [
     path('moduli/modifica/<int:id_modulo>/', views.modulo_crud, name='modifica_modulo'),
     path('moduli/elimina/<int:id_modulo>/', views.modulo_elimina, name='modulo_elimina'),
     
+    path('fondo/', views.TipoFondoListView.as_view(), name='tipofondo_list'),
+    path('fondo/create/', views.TipoFondoCreateView.as_view(), name='tipofondo_create'),
+    path('fondo/<int:pk>/update/', views.TipoFondoUpdateView.as_view(), name='tipofondo_update'),
+    path('fondo/<int:pk>/delete/', views.TipoFondoDeleteView.as_view(), name='tipofondo_delete'),
+    path('fondo/search/', views.search_tipofondo, name='tipofondo_search'),
 
     path('search_azienda',views.search_azienda, name="search_azienda"),
     path('search_modulo',views.search_modulo, name="search_modulo"),
+    
+    
+    path('login/', views.login_view, name='psbsrl_login'),
+    path('logout/', views.logout_view, name='psbsrl_logout'),
+    path('register/', views.register_view, name='psbsrl_register'),
+
 
 ]
