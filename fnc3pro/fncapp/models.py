@@ -9,11 +9,18 @@ class TipoFondo(models.Model):
         return self.nome
     
 class Modulo(models.Model):
-    nome = models.CharField(max_length=255)
-    descrizione = models.TextField(blank=True, null=True)
-    camponote1 = models.TextField(blank=True, null=True)
-    camponote2 = models.TextField(blank=True, null=True)
-    camponote3 = models.TextField(blank=True, null=True)
+    denominazione = models.TextField(blank=True, null=True)
+    risultato_atteso = models.TextField(blank=True, null=True)
+    ore = models.FloatField(blank=True, null=True)
+    ada = models.TextField(blank=True, null=True)
+    processo = models.TextField(blank=True, null=True)
+    sep = models.TextField(blank=True, null=True)
+    specificita_risultato = models.TextField(blank=True, null=True)
+    entrecomp = models.TextField(blank=True, null=True)
+    lifecomp = models.TextField(blank=True, null=True)
+    qcer = models.TextField(blank=True, null=True)
+    livello_di_standard = models.TextField(blank=True, null=True)
+    
     def __str__(self):
         return self.nome
     
@@ -75,20 +82,31 @@ class ProgettoAzienda(models.Model):
         unique_together = ('progetto', 'azienda')
         
 class PianoFormativo(models.Model):
-    nome = models.CharField(max_length=255)
     progetto = models.ForeignKey(Progetto, on_delete=models.CASCADE, related_name='piani_formativi')
     fondo = models.ForeignKey(TipoFondo, on_delete=models.SET_NULL, null=True, related_name='piani_formativi')
     moduli = models.ManyToManyField(Modulo, through='PianoModulo')
-    data_inizio = models.DateField(blank=True, null=True)
-    data_fine = models.DateField(blank=True, null=True)
-    ore_totali = models.FloatField(blank=True, null=True)
-    descrizione = models.TextField(blank=True, null=True)
+    denominazione = models.TextField(blank=True, null=True)
+    processi_innovazione_1 = models.TextField(blank=True, null=True)
+    processi_innovazione_2 = models.TextField(blank=True, null=True)
+    fabbisogno_formativo = models.TextField(blank=True, null=True)
+    intervento_formativo = models.TextField(blank=True, null=True)
+    informazione_comunicazione = models.TextField(blank=True, null=True)
+    processo_valorizzazione = models.TextField(blank=True, null=True)
+    processo_valorizzazione_options = models.TextField(blank=True, null=True)
+    metodologie_didattiche = models.TextField(blank=True, null=True)
+
     def __str__(self):
         return self.nome
     
 class PianoModulo(models.Model):
     piano_formativo = models.ForeignKey(PianoFormativo, on_delete=models.CASCADE)
     modulo = models.ForeignKey(Modulo, on_delete=models.CASCADE)
+    ore_in_presenza = models.FloatField(blank=True, null=True)
+    ore_on_the_job = models.FloatField(blank=True, null=True)
+    fad_sincrona = models.FloatField(blank=True, null=True)
+    fad_asincrona = models.FloatField(blank=True, null=True)
+    dad = models.FloatField(blank=True, null=True)
+
     class Meta:
         unique_together = ('piano_formativo', 'modulo')
         

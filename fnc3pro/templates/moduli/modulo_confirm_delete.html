@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Elimina modulo{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title">Elimina modulo</h4>
+            </div>
+            <div class="card-body text-center">
+                <i class="fa fa-trash-alt text-danger mt-2 mb-2" style="font-size: 3rem;"></i>
+                <p style="font-size: 1.25rem;">Sei sicuro di voler eliminare il modulo <b>{{ object.denominazione }}</b>?</p>
+                <div class="mt-5">
+                    <a href="{% url 'modulo_list' %}" class="btn btn-secondary">Annulla</a>
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger ms-2">Conferma Cancellazione</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

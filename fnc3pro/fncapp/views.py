@@ -5,7 +5,6 @@ import json
 import os, io, logging
 import openpyxl
 import uuid
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
@@ -16,39 +15,40 @@ from django.views.generic import CreateView, UpdateView, DeleteView, View
 from utility.datatable import *
 from django.contrib.auth.mixins import PermissionRequiredMixin
 # Import dei tuoi model
-from .models import *
-from .form import *
+from .models import (
+    Azienda,
+    Dipendente,
+    Progetto,
+    ProgettoAzienda,
+    PianoFormativo,
+    PianoModulo,
+    Timesheet,
+    Modulo,
+    TipoFondo,
+    CodiceAteco
+)
 from .services_openapi import connection_openapi, normalize_ateco
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import authenticate, login, logout as django_logout
-from django.contrib.auth.decorators import login_required
 
 # =======================
 #    INDEX
 # =======================
-@login_required
 def index(request):
     return render(request, 'index.html')
 
 # =======================
 #    AZIENDE
 # =======================
-@login_required
 def lista_aziende(request):
-    # Conta il totale delle aziende
     aziende = Azienda.objects.all()
-    totale_aziende = aziende.count()
-    return render(request, 'aziende/lista_aziende.html', {'aziende': aziende, 'totale_aziende': totale_aziende})
+    return render(request, 'aziende/lista_aziende.html', {'aziende': aziende})
 
-logger = logging.getLogger(__name__)
-@login_required
 def aziende_details(request, id_azienda):
     azienda = get_object_or_404(Azienda, pk=id_azienda)
     
     # Dipendenti associati all'azienda
     dipendenti = azienda.dipendenti.all()
-    
-    # Verifica prerequisiti (esempio di logica)
+
+    # Verifica prerequisiti (esempio di logica):
     # 1. Almeno un dipendente
     dipendenti_presenti = dipendenti.exists()
 
@@ -57,17 +57,16 @@ def aziende_details(request, id_azienda):
     piani_presenti = timesheets_azienda.exists()
 
     # 3. Tutti i timesheet hanno ore_effettuate > 0
-    ore_registrate = all(
-        (ts.ore_effettuate is not None and ts.ore_effettuate > 0)
-        for ts in timesheets_azienda
-    ) if piani_presenti else False
+    #    se non ci sono affatto timesheet, questa condizione risulta False
+    ore_registrate = False
+    if timesheets_azienda.exists():
+        ore_registrate = all(
+            (ts.ore_effettuate is not None and ts.ore_effettuate > 0)
+            for ts in timesheets_azienda
+        )
 
-    # Calcola i prerequisiti generali
     prerequisiti = dipendenti_presenti and piani_presenti and ore_registrate
 
-    # Log utile per debug
-    logger.info(f"Azienda: {azienda.nome}, Dipendenti: {dipendenti.count()}")
-    # Passa i dati al template
     context = {
         'azienda': azienda,
         'dipendenti': dipendenti,
@@ -75,7 +74,9 @@ def aziende_details(request, id_azienda):
     }
     return render(request, 'aziende/aziende_details.html', context)
 
-@login_required
+# Configura il logger
+logger = logging.getLogger(__name__)
+
 def azienda_crud(request, id_azienda=None):
     """
     Creazione o modifica di un'azienda.
@@ -147,15 +148,13 @@ def azienda_crud(request, id_azienda=None):
         'azienda': azienda,
         'codici_ateco': codici_ateco,
     })
-@login_required
+    
 def azienda_dipendenti(request, id_azienda):
     azienda = get_object_or_404(Azienda, pk=id_azienda)
     dipendenti = azienda.dipendenti.all()
-    totale_dipendenti = dipendenti.count()  # Calcola il totale dei dipendenti
     context = {
         'azienda': azienda,
         'dipendenti': dipendenti,
-        'totale_dipendenti': totale_dipendenti,  # Passa il totale al template
     }
     return render(request, 'aziende/azienda_dipendenti.html', context)
 
@@ -177,7 +176,6 @@ def elimina_azienda(request, id_azienda):
 # =======================
 #   DIPENDENTI
 # =======================
-@login_required
 def lista_dipendenti(request):
     dipendenti = Dipendente.objects.all()
     return render(request, 'dipendenti/lista_dipendenti.html', {'dipendenti': dipendenti})
@@ -189,7 +187,7 @@ def dipendenti_details(request, dipendente_id):
         'dipendente': dipendente,
         'azienda': azienda
     })
-@login_required
+
 def dipendenti_crud(request, dipendente_id=None):
     if dipendente_id:
         dipendente = get_object_or_404(Dipendente, pk=dipendente_id)
@@ -280,7 +278,7 @@ def dipendenti_crud(request, dipendente_id=None):
         'dipendente': dipendente,
         'aziende': aziende,
     })
-@login_required
+    
 def dipendenti_delete(request, dipendente_id):
     """
     View per la cancellazione di un dipendente.
@@ -296,15 +294,14 @@ def dipendenti_delete(request, dipendente_id):
 # =======================
 #   PIANI FORMATIVI
 # =======================
-@login_required
 def lista_piani(request):
     piani = PianoFormativo.objects.all()
     return render(request, 'piani/lista_pianiformativi.html', {'piani': piani})
-@login_required
+
 def piano_details(request, id_piano):
     piano = get_object_or_404(PianoFormativo, pk=id_piano)
     return render(request, 'piani/piano_details.html', {'piano': piano})
-@login_required
+
 def piano_crud(request, id_piano=None):
     if id_piano:
         piano = get_object_or_404(PianoFormativo, pk=id_piano)
@@ -363,7 +360,7 @@ def piano_crud(request, id_piano=None):
         'progetti': progetti,
         'fondi': fondi,
     })
-@login_required
+
 def piano_elimina(request, id_piano):
     piano = get_object_or_404(PianoFormativo, pk=id_piano)
     piano.delete()
@@ -373,7 +370,6 @@ def piano_elimina(request, id_piano):
 # =======================
 #   PROGETTI
 # =======================
-@login_required
 def lista_progetti(request):
     """
     Mostra la lista dei progetti e i piani associati (se presenti).
@@ -397,11 +393,11 @@ def lista_progetti(request):
     return render(request, 'progetti/lista_progetti.html', {
         'progetti': progetti_render
     })
-@login_required
+
 def progetto_details(request, id_progetto):
     progetto = get_object_or_404(Progetto, pk=id_progetto)
     return render(request, 'progetti/progetto_details.html', {'progetto': progetto})
-@login_required
+
 def progetto_crud(request, id_progetto=None):
     if id_progetto:
         progetto = get_object_or_404(Progetto, pk=id_progetto)
@@ -431,7 +427,6 @@ def progetto_crud(request, id_progetto=None):
 
     return render(request, 'progetti/progetti_crud.html', {'progetto': progetto})
 
-@login_required
 def progetto_elimina(request, id_progetto):
     progetto = get_object_or_404(Progetto, pk=id_progetto)
     progetto.delete()
@@ -443,17 +438,14 @@ def progetto_elimina(request, id_progetto):
 #   MODULI (CRUD)
 # =======================
 
-@login_required
 def lista_moduli(request):
     moduli = Modulo.objects.all()
     return render(request, 'moduli/lista_moduli.html', {'moduli': moduli})
 
-@login_required
 def modulo_details(request, id_modulo):
     modulo = get_object_or_404(Modulo, pk=id_modulo)
     return render(request, 'moduli/modulo_details.html', {'modulo': modulo})
 
-@login_required
 def modulo_crud(request, id_modulo=None):
     """
     Creazione o modifica di un modulo.
@@ -485,7 +477,6 @@ def modulo_crud(request, id_modulo=None):
         'modulo': modulo
     })
 
-@login_required
 def modulo_elimina(request, id_modulo):
     modulo = get_object_or_404(Modulo, pk=id_modulo)
     modulo.delete()
@@ -498,7 +489,6 @@ def modulo_elimina(request, id_modulo):
 #   Wizard di associazione
 #   (esempio con Progetti e Piani)
 # =======================
-@login_required
 def wizard_propiani(request):
     """
     Esempio di 'wizard' che associa più Piani Formativi ad un Progetto.
@@ -533,7 +523,6 @@ def wizard_propiani(request):
 #   Allegati / Export
 # =======================
 
-@login_required
 def pagina_generazione_allegato(request, id_azienda):
     azienda = get_object_or_404(Azienda, pk=id_azienda)
     dipendenti = azienda.dipendenti.all()
@@ -565,25 +554,7 @@ def pagina_generazione_allegato(request, id_azienda):
     }
     return render(request, 'allegati/genera_allegato2bis.html', context)
 
-@login_required
-def seleziona_azienda_allegato(request):
-    """
-    View per selezionare un'azienda e reindirizzare alla pagina di generazione allegato.
-    """
-    if request.method == 'POST':
-        id_azienda = request.POST.get('id_azienda')
-        if id_azienda:
-            # Reindirizza alla view `pagina_generazione_allegato`
-            return redirect('pagina_generazione_allegato', id_azienda=id_azienda)
-        else:
-            messages.error(request, "Seleziona un'azienda valida.")
 
-    # Recupera tutte le aziende
-    aziende = Azienda.objects.all()
-    context = {'aziende': aziende}
-    return render(request, 'aziende/seleziona_azienda_allegato.html', context)
-
-@login_required
 def genera_allegato_excel(request, id_azienda):
     import os, io
     import openpyxl
@@ -661,7 +632,6 @@ def genera_allegato_excel(request, id_azienda):
 # =======================
 #   CALCOLI DI CONTRIBUTO
 # =======================
-@login_required
 def calcola_contributo(codice_fiscale, ore_lavorate, quota_retribuzione_oraria, quota_contribuzione_oraria):
     """
     Esempio: calcola il contributo totale per un lavoratore
@@ -681,7 +651,6 @@ def calcola_contributo(codice_fiscale, ore_lavorate, quota_retribuzione_oraria, 
         "contributo_totale": round(contributo_totale, 2),
     }
 
-@login_required
 def genera_dati_contributo(request, id_azienda):
     """
     Esempio di pagina che mostra un riepilogo di calcolo contributi
@@ -713,7 +682,6 @@ def genera_dati_contributo(request, id_azienda):
     })
 
 
-@login_required
 def wizard_allegato2bis(request):
     """
     Un'unica view per gestire:
@@ -841,7 +809,6 @@ def wizard_allegato2bis(request):
     
     
 
-@login_required
 def carica_azienda_openapi(request):
     partitaiva = request.GET.get('partitaiva', '').strip()
     if not partitaiva:
@@ -945,7 +912,7 @@ def carica_azienda_openapi(request):
         'status_societa': stato_attivita,
     })
 
-@login_required
+
 def update_azienda_openapi(request):
     partitaiva = request.GET.get('partitaiva', '').strip()
     if not partitaiva:
@@ -1025,7 +992,6 @@ class ProgettoCreateView(CreateView):
         else:
             data['piani_formativi'] = PianoFormativoInlineFormSet(instance=self.object, prefix='piani_formativi')
         return data
-
     @transaction.atomic
     def form_valid(self, form):
         context = self.get_context_data()
@@ -1036,7 +1002,6 @@ class ProgettoCreateView(CreateView):
         piani_formativi.instance = self.object
         piani_formativi.save()
         return redirect(self.success_url)
-
 class ProgettoUpdateView(UpdateView):
     model = Progetto
     form_class = ProgettoForm
@@ -1059,7 +1024,6 @@ class ProgettoUpdateView(UpdateView):
         piani_formativi.instance = self.object
         piani_formativi.save()
         return redirect(self.success_url)
-@login_required
 def search_azienda(request):
     search_term = request.GET.get('term', '')
     page = request.GET.get('page', 1)
@@ -1081,7 +1045,6 @@ def search_azienda(request):
         'results': results,
         'pagination': {'more': end < total}
     })
-@login_required
 def search_modulo(request):
     search_term = request.GET.get('term', '')
     page = request.GET.get('page', 1)
@@ -1103,88 +1066,6 @@ def search_modulo(request):
         'results': results,
         'pagination': {'more': end < total}
     })
-    
-# =======================
-#    TIMESHEET
-# =======================
-@login_required
-def seleziona_azienda_timesheet(request):
-    """
-    Mostra una lista di aziende tra cui l'utente può scegliere.
-    Una volta selezionata, reindirizza alla pagina corretta.
-    """
-    aziende = Azienda.objects.all()  # Recupera tutte le aziende
-    if request.method == 'POST':
-        # Recupera l'ID dell'azienda selezionata
-        id_azienda = request.POST.get('id_azienda')
-        if id_azienda:
-            # Salva l'azienda in sessione (opzionale)
-            request.session['azienda_selezionata'] = id_azienda
-            return redirect('timesheet_per_azienda', id_azienda=id_azienda)
-        else:
-            messages.error(request, "Seleziona un'azienda valida.")
-
-    return render(request, 'aziende/seleziona_azienda_timesheet.html', {'aziende': aziende})
-
-@login_required
-def timesheet_per_azienda(request, id_azienda):
-    # Recupera l'azienda specifica
-    azienda = get_object_or_404(Azienda, pk=id_azienda)
-
-    # Recupera i dipendenti associati all'azienda
-    dipendenti = azienda.dipendenti.all()
-
-    # Recupera tutti i timesheet associati ai dipendenti di questa azienda
-    timesheets = Timesheet.objects.filter(dipendente__in=dipendenti).select_related('dipendente', 'piano_modulo')
-
-    context = {
-        'azienda': azienda,
-        'timesheets': timesheets,
-    }
-
-    return render(request, 'aziende/timesheet_per_azienda.html', context)
-
-@login_required
-def salva_timesheet(request, timesheet_id):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        timesheet = get_object_or_404(Timesheet, pk=timesheet_id)
-
-        timesheet.ore_previste = data.get("ore_previste")
-        timesheet.ore_effettuate = data.get("ore_effettuate")
-        timesheet.importo_retributivo = data.get("importo_retributivo")
-        timesheet.importo_contributivo = data.get("importo_contributivo")
-        timesheet.save()
-
-        return JsonResponse({"success": True, "message": "Timesheet aggiornato correttamente."})
-    return JsonResponse({"success": False, "message": "Metodo non consentito."})
-
-@login_required
-def salva_tutti_timesheets(request):
-    if request.method == "POST":
-        try:
-            # Carica i dati inviati nella richiesta
-            data = json.loads(request.body)
-            updates = data.get("updates", [])
-            print("Dati ricevuti:", updates)  # Stampa i dati nel log per verificare
-
-            for update in updates:
-                # Recupera il timesheet dal database
-                timesheet = Timesheet.objects.get(pk=update["id"])
-                
-                # Aggiorna i campi del timesheet
-                timesheet.ore_previste = update.get("ore_previste", timesheet.ore_previste)
-                timesheet.ore_effettuate = update.get("ore_effettuate", timesheet.ore_effettuate)
-                timesheet.importo_retributivo = update.get("importo_retributivo", timesheet.importo_retributivo)
-                timesheet.importo_contributivo = update.get("importo_contributivo", timesheet.importo_contributivo)
-                timesheet.save()
-
-            return JsonResponse({"success": True, "message": "Tutti i timesheet sono stati aggiornati correttamente."})
-        except Timesheet.DoesNotExist:
-            return JsonResponse({"success": False, "message": "Un timesheet specificato non esiste."})
-        except Exception as e:
-            return JsonResponse({"success": False, "message": f"Errore durante l'aggiornamento: {str(e)}"})
-    return JsonResponse({"success": False, "message": "Metodo non consentito."})
 
 def get_tipofondo_table(request):
     queryset = TipoFondo.objects.all().order_by('nome')
@@ -1234,20 +1115,20 @@ class TipoFondoCreateView(CreateView):
     model = TipoFondo
     form_class = TipoFondoForm
     template_name = 'tipofondo/tipofondo_create_form.html'
-    success_url = reverse_lazy('core:tipofondo_list')
+    success_url = reverse_lazy('tipofondo_list')
     raise_exception = True
 
 class TipoFondoUpdateView(UpdateView):
     model = TipoFondo
     form_class = TipoFondoForm
     template_name = 'tipofondo/tipofondo_edit_form.html'
-    success_url = reverse_lazy('core:tipofondo_list')
+    success_url = reverse_lazy('tipofondo_list')
     raise_exception = True
 
 class TipoFondoDeleteView(DeleteView):
     model = TipoFondo
     template_name = 'tipofondo/tipofondo_confirm_delete.html'
-    success_url = reverse_lazy('core:tipofondo_list')
+    success_url = reverse_lazy('tipofondo_list')
     raise_exception = True
 
 def search_tipofondo(request):
@@ -1269,63 +1150,90 @@ def search_tipofondo(request):
         'pagination': {'more': end < total}
     })
 
+def get_modulo_table(request):
+    queryset = Modulo.objects.all().order_by('denominazione')
 
-# =======================
-#    autenticazione
-# =======================
+    fields = ['denominazione', 'risultato_atteso', 'ore']
+    manual_name_and_verbose = {
+        'denominazione': ('denominazione', 'Denominazione'),
+        'risultato_atteso': ('risultato_atteso', 'Risultato Atteso'),
+        'ore': ('ore', 'Ore')
+    }
 
+    additional_fields = ['id']
+    table_filter = 'global'
+    paginate = sortable = True
 
+    table = Table(
+        request=request,
+        queryset=queryset,
+        fields=fields,
+        additional_fields=additional_fields,
+        manual_name_and_verbose=manual_name_and_verbose,
+        table_filter=table_filter,
+        sortable=sortable,
+        paginate=paginate
+    )
 
-def login_view(request):
-    """
-    View per gestire il login degli utenti.
-    """
-    if request.method == 'POST':
-        form = CustomAuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                messages.success(request, f"Benvenuto, {username}!")
-                return redirect('index')  # Reindirizza alla homepage
-            else:
-                messages.error(request, "Credenziali non valide.")
-        else:
-            messages.error(request, "Errore nel form. Correggi i campi evidenziati.")
-    else:
-        form = CustomAuthenticationForm()
-
-    return render(request, 'accounts/auth_login.html', {'form': form})
-
-@login_required
-def logout_view(request):
-    """
-    View per eseguire il logout.
-    """
-    django_logout(request)
-    messages.success(request, "Sei uscito dall'account.")
-    return redirect('psbsrl_login')
+    return table
 
 
-def register_view(request):
-    """
-    View per la registrazione di nuovi utenti 
-    usando il dominio psbsrl nell'email.
-    """
-    if request.method == 'POST':
-        form = PsbsrlRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()   # Salva l'utente
-            # Imposta il backend per il login
-            user.backend = 'django.contrib.auth.backends.ModelBackend'  # Sostituisci con il tuo backend se diverso
-            login(request, user)  # Esegui il login
-            messages.success(request, "Registrazione completata con successo! Benvenuto!")
-            return redirect('index')  # o altra pagina dopo registrazione
-        else:
-            messages.error(request, "Errore nella registrazione. Correggi i campi indicati.")
-    else:
-        form = PsbsrlRegistrationForm()
+class ModuloListView(View):
+    raise_exception = True
 
-    return render(request, 'accounts/auth_register.html', {'form': form})
+    def get(self, request, *args, **kwargs):
+        context = {}
+        template = 'modulo/modulo_list.html'
+
+        table = get_modulo_table(request)
+
+        if 'type' in request.GET and request.GET['type'] == 'view':
+            return table.execute()
+
+        context['table'] = [table.datatable_data_keys, table.table_columns_headers]
+        context['field_header'] = zip(table.datatable_data_keys, table.table_columns_headers)
+
+        return render(request, template, context)
+
+
+class ModuloCreateView(CreateView):
+    model = Modulo
+    form_class = ModuloForm
+    template_name = 'modulo/modulo_create_form.html'
+    success_url = reverse_lazy('modulo_list')
+    raise_exception = True
+
+
+class ModuloUpdateView(UpdateView):
+    model = Modulo
+    form_class = ModuloForm
+    template_name = 'modulo/modulo_edit_form.html'
+    success_url = reverse_lazy('modulo_list')
+    raise_exception = True
+
+
+class ModuloDeleteView(DeleteView):
+    model = Modulo
+    template_name = 'modulo/modulo_confirm_delete.html'
+    success_url = reverse_lazy('modulo_list')
+    raise_exception = True
+
+
+def search_modulo(request):
+    search_term = request.GET.get('term', '')
+    page = request.GET.get('page', 1)
+    page_size = 10
+
+    queryset = Modulo.objects.filter(denominazione__icontains=search_term).order_by('denominazione')
+    total = queryset.count()
+    start = (int(page) - 1) * page_size
+    end = start + page_size
+
+    results = [
+        {'id': elem.pk, 'text': elem.denominazione} for elem in queryset[start:end]
+    ]
+
+    return JsonResponse({
+        'results': results,
+        'pagination': {'more': end < total}
+    })

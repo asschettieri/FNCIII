@@ -96,33 +96,15 @@
                             <div class="piani_formativi-formset-container">
                                 {% for form in piani_formativi %}
                                     <div class="dynamic-form p-3 mb-3 border rounded bg-white">
-                                        <div class="row align-items-center">
+                                        <div class="row">
                                             {% if form.id %}{{ form.id }}{% endif %}
-                                            <div class="col-md-6">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
-                                                    {{ form.nome.label_tag }}
-                                                    {{ form.nome }}
+                                                    {{ form.denominazione.label_tag }}
+                                                    {{ form.denominazione }}
                                                 </div>
                                             </div>
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    {{ form.data_inizio.label_tag }}
-                                                    {{ form.data_inizio }}
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="form-group">
-                                                    {{ form.data_fine.label_tag }}
-                                                    {{ form.data_fine }}
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    {{ form.ore_totali.label_tag }}
-                                                    {{ form.ore_totali }}
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-12">
                                                 <div class="form-group">
                                                     {{ form.fondo.label_tag }}
                                                     {{ form.fondo }}
@@ -130,8 +112,50 @@
                                             </div>
                                             <div class="col-md-12">
                                                 <div class="form-group">
-                                                    {{ form.descrizione.label_tag }}
-                                                    {{ form.descrizione }}
+                                                    {{ form.processi_innovazione_1.label_tag }}
+                                                    {{ form.processi_innovazione_1 }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    {{ form.processi_innovazione_2.label_tag }}
+                                                    {{ form.processi_innovazione_2 }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    {{ form.fabbisogno_formativo.label_tag }}
+                                                    {{ form.fabbisogno_formativo }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    {{ form.intervento_formativo.label_tag }}
+                                                    {{ form.intervento_formativo }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    {{ form.informazione_comunicazione.label_tag }}
+                                                    {{ form.informazione_comunicazione }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    {{ form.processo_valorizzazione.label_tag }}
+                                                    {{ form.processo_valorizzazione }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    {{ form.processo_valorizzazione_options.label_tag }}
+                                                    {{ form.processo_valorizzazione_options }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    {{ form.metodologie_didattiche.label_tag }}
+                                                    {{ form.metodologie_didattiche }}
                                                 </div>
                                             </div>
                                             <div class="col-md-12">
@@ -154,35 +178,53 @@
                             </div>
                             <div class="empty-form d-none">
                                 <div class="dynamic-form p-3 mb-3 border rounded bg-white">
-                                    <div class="row align-items-center">
-                                        <div class="col-md-6">
+                                    <div class="row">
+                                        <div class="col-md-12">
                                             <div class="form-group">
-                                                {{ piani_formativi.empty_form.nome.label_tag }}
-                                                {{ piani_formativi.empty_form.nome }}
+                                                {{ piani_formativi.empty_form.processi_innovazione_1.label_tag }}
+                                                {{ piani_formativi.empty_form.processi_innovazione_1 }}
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-12">
                                             <div class="form-group">
-                                                {{ piani_formativi.empty_form.data_inizio.label_tag }}
-                                                {{ piani_formativi.empty_form.data_inizio }}
+                                                {{ piani_formativi.empty_form.processi_innovazione_2.label_tag }}
+                                                {{ piani_formativi.empty_form.processi_innovazione_2 }}
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-12">
                                             <div class="form-group">
-                                                {{ piani_formativi.empty_form.data_fine.label_tag }}
-                                                {{ piani_formativi.empty_form.data_fine }}
+                                                {{ piani_formativi.empty_form.fabbisogno_formativo.label_tag }}
+                                                {{ piani_formativi.empty_form.fabbisogno_formativo }}
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <div class="form-group">
-                                                {{ piani_formativi.empty_form.ore_totali.label_tag }}
-                                                {{ piani_formativi.empty_form.ore_totali }}
+                                                {{ piani_formativi.empty_form.intervento_formativo.label_tag }}
+                                                {{ piani_formativi.empty_form.intervento_formativo }}
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <div class="form-group">
-                                                {{ piani_formativi.empty_form.descrizione.label_tag }}
-                                                {{ piani_formativi.empty_form.descrizione }}
+                                                {{ piani_formativi.empty_form.informazione_comunicazione.label_tag }}
+                                                {{ piani_formativi.empty_form.informazione_comunicazione }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                {{ piani_formativi.empty_form.processo_valorizzazione.label_tag }}
+                                                {{ piani_formativi.empty_form.processo_valorizzazione }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                {{ piani_formativi.empty_form.processo_valorizzazione_options.label_tag }}
+                                                {{ piani_formativi.empty_form.processo_valorizzazione_options }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                {{ piani_formativi.empty_form.metodologie_didattiche.label_tag }}
+                                                {{ piani_formativi.empty_form.metodologie_didattiche }}
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -204,7 +246,7 @@
                                 </div>
                             </div>
                         </div>
-                    </fieldset>
+                    </fieldset>                   
 
                     <button class="btn btn-primary btn-block py-2 mb-4 mt-5 fw500 w-100" type="submit">Salva</button>
                 </form>
